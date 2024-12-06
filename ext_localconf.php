@@ -34,4 +34,9 @@ defined('TYPO3') || die('Access denied.');
             ['source' => 'EXT:easyconf/Resources/Public/Icons/' . $iconKey . '.svg']
         );
     }
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1733328550] = [
+        'nodeName' => 'staticText',
+        'priority' => 40,
+        'class' => \Buepro\Easyconf\Form\Element\StaticTextElement::class,
+    ];
 })();
