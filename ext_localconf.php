@@ -7,9 +7,15 @@
  * LICENSE file that was distributed with this source code.
  */
 
+use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 defined('TYPO3') || die('Access denied.');
 
 (static function () {
+
+    \Buepro\Easyconf\Service\TcaBuilderService::includeConstantDefaultFileContent();
+
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTypoScriptSetup(
         '@import "EXT:easyconf/Configuration/TypoScript/setup.typoscript"'
     );
@@ -39,4 +45,15 @@ defined('TYPO3') || die('Access denied.');
         'priority' => 40,
         'class' => \Buepro\Easyconf\Form\Element\StaticTextElement::class,
     ];
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1733831527] = [
+        'nodeName' => 'blank',
+        'priority' => 40,
+        'class' => \Buepro\Easyconf\Form\Element\BlankElement::class,
+    ];
+    if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['enablePaletteStylingOverrideFeature'] ?? 0) {
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\Form\Container\PaletteAndSingleContainer::class] = [
+            'className' => \Buepro\Easyconf\Form\Container\PaletteAndSingleContainer::class,
+        ];
+    }
+
 })();

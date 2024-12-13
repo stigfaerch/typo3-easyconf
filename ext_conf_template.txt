@@ -3,3 +3,6 @@
 
 # cat=basic/; type=boolean; label=Load demo configuration: If disabled, you need to provide your own configuration.
     loadDemoConfiguration = 1
+
+# cat=basic/; type=boolean; label=Enable palette styling override: If enabled, you can override tag for palette label and colClass for elements in a palette
+     enablePaletteStylingOverrideFeature = 0

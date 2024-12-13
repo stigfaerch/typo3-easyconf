@@ -79,7 +79,7 @@ class TcaUtility
      * @param string $propertyList
      * @param string $fieldPrefix
      * @param string $fieldList
-     * @param string $labelList optional - if present, then overrides LLL path
+     * @param array $modify
      * @return array
      */
     public static function getPropertyMap(
@@ -88,17 +88,17 @@ class TcaUtility
         string $propertyList,
         string $fieldPrefix = '',
         string $fieldList = '',
-        string $labelList = ''
+        array $modify = []
     ): array {
         $properties = GeneralUtility::trimExplode(',', $propertyList);
         $fields = self::getFields($properties, $fieldPrefix, $fieldList);
-        $fieldLabelMap = $labelList ? array_combine($fields, GeneralUtility::trimExplode(',', $labelList)) : [];
+        $fieldLabelMap = $modify ? array_combine($fields, $modify) : [];
         return [
             'mapper' => $mapper,
             'path' => $path,
             'propertyFieldMap' => array_combine($properties, $fields),
             'fieldPropertyMap' => array_combine($fields, $properties),
-            'fieldLabelMap' => $fieldLabelMap,
+            'fieldModifyMap' => $fieldLabelMap,
         ];
     }
 
@@ -117,6 +117,9 @@ class TcaUtility
                         'type' => 'input',
                     ],
                 ];
+                if($propertyMap['fieldModifyMap'][$field] ?? false) {
+                    $result[$field] = array_replace_recursive($result[$field], $propertyMap['fieldModifyMap'][$field]);
+                }
             }
         }
         return $result;
@@ -131,11 +134,16 @@ class TcaUtility
         if ($lineBreakPeriod > 0) {
             $properties = GeneralUtility::trimExplode(',', $propertyList);
             $propertiesWithLineBreaks = [];
-            foreach ($properties as $key => $value) {
-                if ($key > 0 && $key % $lineBreakPeriod === 0) {
+            $index = 0;
+            foreach ($properties as $value) {
+                if($value == '--linebreak--') {
+                    $index = -1;
+                }
+                if ($index > 0 && $index % $lineBreakPeriod === 0) {
                     $propertiesWithLineBreaks[] = '--linebreak--';
                 }
                 $propertiesWithLineBreaks[] = $value;
+                $index++;
             }
             $propertyList = implode(', ', $propertiesWithLineBreaks);
         }

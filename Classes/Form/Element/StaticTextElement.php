@@ -14,11 +14,24 @@ class StaticTextElement extends AbstractFormElement
     {
         $resultArray['html'] = '';
         $parameterArray = $this->data['parameterArray'] ?? [];
-        if($header = $parameterArray['fieldConf']['config']['parameters']['header'] ?? false) {
-            $resultArray['html'] .= "<h3>{$header}</h3>";
+        $width = $parameterArray['fieldConf']['width'] ?? 100;
+        // Ensure the width is within the range of 0 to 100
+        $width = max(0, min(100, $width));
+
+        // Map the width (0-100) to the range (0-12)
+        $cols = round(($width / 100) * 12);
+        $config = $parameterArray['fieldConf'];
+        $headerAttributes = '';
+        if($config['headerAttributes'] ?? false) {
+            foreach ($config['headerAttributes'] as $key => $value) {
+                $headerAttributes .= ' ' . $key . '="' . $value . '"';
+            }
         }
-        if($text = $parameterArray['fieldConf']['config']['parameters']['text'] ?? false) {
-            $resultArray['html'] .= "<p class='col-md-6'>{$text}</p>";
+        if($header = $config['helpHeader'] ?? false) {
+            $resultArray['html'] .= "<{$config['headerTag']} $headerAttributes>{$header}</{$config['headerTag']}>";
+        }
+        if($text = $parameterArray['fieldConf']['helpText'] ?? false) {
+            $resultArray['html'] .= "<div class='col-md-{$cols}'>{$text}</div>";
         }
         $resultArray['labelHasBeenHandled'] = true;
         return $resultArray;

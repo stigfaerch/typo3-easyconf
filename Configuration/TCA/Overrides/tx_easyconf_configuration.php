@@ -114,6 +114,5 @@ defined('TYPO3') or die('Access denied.');
             'settings'
         );
     }
-
     unset($tca);
 })();
