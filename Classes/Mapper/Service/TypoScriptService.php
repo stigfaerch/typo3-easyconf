@@ -131,7 +131,7 @@ class TypoScriptService implements SingletonInterface, MapperServiceInterface, L
         $treeTraverserVisitors[] = $constantAstBuilderVisitor;
         $treeTraverser->traverse($constantIncludeTree, $treeTraverserVisitors);
         $constantsAst = $constantAstBuilderVisitor->getAst();
-        return GeneralUtility::removeDotsFromTS($constantsAst->toArray());
+        return $constantsAst->flatten();
     }
 
     public function getConstants(): array
@@ -146,20 +146,12 @@ class TypoScriptService implements SingletonInterface, MapperServiceInterface, L
 
     public function getConstantByPath(string $path): string
     {
-        $result = '';
-        if (ArrayUtility::isValidPath($this->getConstants(), $path, '.')) {
-            $result = ArrayUtility::getValueByPath($this->getConstants(), $path, '.');
-        }
-        return is_string($result) ? $result : '';
+        return $this->getConstants()[$path] ?? '';
     }
 
     public function getInheritedConstantByPath(string $path): string
     {
-        $result = '';
-        if (ArrayUtility::isValidPath($this->getInheritedConstants(), $path, '.')) {
-            $result = ArrayUtility::getValueByPath($this->getInheritedConstants(), $path, '.');
-        }
-        return is_string($result) ? $result : '';
+        return $this->getInheritedConstants()[$path] ?? '';
     }
 
     public function getTemplateRow(): array
