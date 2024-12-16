@@ -145,9 +145,9 @@ class TcaBuilderService
         $config = ['type' => 'link','allowedTypes' => ['file'],];
         if($allowedFileExtensions) {
             $config['appearance']['allowedFileExtensions'] = $allowedFileExtensions;
-            $config['appearance']['allowedExtensions'] = $allowedFileExtensions;
+//            $config['appearance']['allowedExtensions'] = $allowedFileExtensions;
 //            $config['appearance']['enableBrowser'] = false;
-            $config['appearance']['browserTitle'] = 'Browser Title';
+//            $config['appearance']['browserTitle'] = 'Browser Title';
         }
         return $this->buildType($property, $config, $propConfig);
     }
