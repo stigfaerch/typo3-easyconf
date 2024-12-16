@@ -140,9 +140,15 @@ class TcaBuilderService
         return $this->buildType($property, $config, $propConfig);
     }
 
-    function insertLinkToFile($property, $propConfig = []): array
+    function insertLinkToFile($property, array $allowedFileExtensions = [], $propConfig = []): array
     {
-        $config = ['type' => 'link','allowedTypes' => ['file']];
+        $config = ['type' => 'link','allowedTypes' => ['file'],];
+        if($allowedFileExtensions) {
+            $config['appearance']['allowedFileExtensions'] = $allowedFileExtensions;
+            $config['appearance']['allowedExtensions'] = $allowedFileExtensions;
+//            $config['appearance']['enableBrowser'] = false;
+            $config['appearance']['browserTitle'] = 'Browser Title';
+        }
         return $this->buildType($property, $config, $propConfig);
     }
 
