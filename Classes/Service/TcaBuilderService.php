@@ -143,6 +143,12 @@ class TcaBuilderService
     function insertLinkToFile($property, array $allowedFileExtensions = [], $propConfig = []): array
     {
         $config = ['type' => 'link','allowedTypes' => ['file'],];
+        $config = array_merge($config, ['fieldInformation' => [
+            'linkImagePreview' => [
+                'renderType' => 'linkImagePreview',
+            ]
+        ]
+        ]);
         if($allowedFileExtensions) {
             $config['appearance']['allowedFileExtensions'] = $allowedFileExtensions;
 //            $config['appearance']['allowedExtensions'] = $allowedFileExtensions;
@@ -331,13 +337,8 @@ class TcaBuilderService
 
     protected function addFieldInformationConfiguration(&$config): void {
         if(!is_array($config)) { return;}
-        $config = array_merge($config,
-            ['fieldInformation' =>
-                [
-                    'staticText' => [
-                        'renderType' => 'staticText',
-                    ]
-                ]
-            ]);
+        $config['fieldInformation'] = array_merge(
+            $config['fieldInformation'] ?? [],
+            [['renderType' => 'staticText']]);
     }
 }
