@@ -36,6 +36,8 @@ class DataHandlerHook implements SingletonInterface
      */
     protected static ?array $configurationData = null;
 
+    protected bool $processed = false;
+
     protected EventDispatcherInterface $eventDispatcher;
     protected ConstantSubstitutor $constantSubstitutor;
 
@@ -85,6 +87,7 @@ class DataHandlerHook implements SingletonInterface
                 $configurationRecord
             ));
             $this->constantSubstitutor->substitute();
+            self::$configurationData = null;
             foreach (MapperRegistry::getInstances() as $mapper) {
                 $mapper->persistBuffer();
             }
@@ -93,7 +96,6 @@ class DataHandlerHook implements SingletonInterface
             )) {
                 GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroup('pages');
             }
-            self::$configurationData = null;
         }
     }
 

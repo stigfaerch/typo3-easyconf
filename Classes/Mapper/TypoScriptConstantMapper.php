@@ -17,9 +17,11 @@ use Buepro\Easyconf\Mapper\Utility\TypoScriptConstantMapperUtility;
 use Buepro\Easyconf\Service\FileService;
 use Buepro\Easyconf\Utility\GeneralUtility as EasyconfGeneralUtility;
 use Buepro\Easyconf\Utility\TcaUtility;
+use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
@@ -172,13 +174,11 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
             $constants = implode("\r\n", $parts);
         }
         $constants .= sprintf("\r\n\r\n%s", $tokenAndImportStatement);
-        GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('sys_template')
-            ->update(
-                'sys_template',
-                ['constants' => $constants],
-                ['uid' => (int)$this->typoScriptService->getTemplateRow()['uid']],
-                [Connection::PARAM_STR]
-            );
+        $GLOBALS['BE_USER']->user['admin'] = true;
+        /** @var DataHandler $dataHandler */
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
+        $recData['sys_template'][(int)$this->typoScriptService->getTemplateRow()['uid']]['constants'] = $constants;
+        $dataHandler->start($recData, []);
+        $dataHandler->process_datamap();
     }
 }
