@@ -2,14 +2,10 @@
 
 namespace Buepro\Easyconf\Form\FieldInformation;
 
-use ApacheSolrForTypo3\Solr\System\Validator\Path;
 use TYPO3\CMS\Backend\Form\AbstractNode;
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
-use TYPO3\CMS\Core\Resource\Processing\SvgImageProcessor;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\PathUtility;
 
 class LinkImagePreview extends AbstractNode
 {
