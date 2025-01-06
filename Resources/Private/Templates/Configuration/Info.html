@@ -61,7 +61,7 @@
                                     uid="{site.configurationUid}"
                                     group="{typeKey}"
                                 >
-                                 <f:variable name="groupTitle"><f:translate key="{typeData.title}" /></f:variable>
+                                    <f:variable name="groupTitle"><f:format.case mode="lower" ><f:translate key="{typeData.title}" /></f:format.case></f:variable>
                                     <f:format.printf arguments="{groupTitle: groupTitle}">{f:translate(key: 'editGroup')}</f:format.printf>
                                 </easyconf:link.editRecord>
                             </div>
