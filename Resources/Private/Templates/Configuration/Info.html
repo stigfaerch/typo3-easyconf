@@ -101,7 +101,7 @@
                 data="{inline:1}"
                 returnUrl="{f:be.uri(route: 'web_Easyconf')}"
                 table="tx_easyconf_configuration"
-                uid="{site.configurationUid}"
+                uid="{site.configurationUidMap.{typeKey}}"
                 group="{typeKey}"
             >
                 <f:variable name="groupTitle"><f:format.case mode="lower" ><f:translate key="{typeData.title}" /></f:format.case></f:variable>

@@ -20,6 +20,7 @@ use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
@@ -115,8 +116,19 @@ class ConfigurationController extends ActionController
                 $page = $pageRepository->getPage($site->getRootPageId());
                 $title = trim($page['title'] ?? $site->getIdentifier());
                 $title = $title === '' ? $page['subtitle'] : $title;
+
+                foreach ($GLOBALS['TCA']['tx_easyconf_configuration']['types'] as $key => $type) {
+                    if($type['pageUidFromSiteSetting'] ?? false) {
+                        $pid = ArrayUtility::getValueByPath($site->getSettings()->getAll(), $type['pageUidFromSiteSetting'], '.');
+                        $typeToConfigurationUidMap[$key] = self::getConfigurationUid($pid) ?? $configurationUid;
+                    } else {
+                        $typeToConfigurationUidMap[$key] = $configurationUid;
+                    }
+                }
+
                 return [
                     'configurationUid' => $configurationUid,
+                    'typeToConfigurationUidMap' => $typeToConfigurationUidMap ?? [],
                     'rootPageTitle' => $title,
                     'rootPageUid' => $site->getRootPageId(),
                 ];
@@ -135,6 +147,20 @@ class ConfigurationController extends ActionController
                 [Connection::PARAM_INT]
             );
     }
+
+    public static function getConfigurationUid($pageUid)
+    {
+        if($pageUid ?? false) {
+            if($uid = GeneralUtility::makeInstance(DatabaseService::class)
+                ->getField('tx_easyconf_configuration', 'uid', ['pid' => $pageUid])) {
+                return $uid;
+            } else {
+                return self::createConfiguration((int)$pageUid)['uid'];
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Hidden page navigation

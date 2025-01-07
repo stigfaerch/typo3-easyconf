@@ -7,6 +7,7 @@ use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
 use Buepro\Easyconf\Utility\TcaUtility;
 use Random\RandomException;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -70,7 +71,7 @@ class TcaBuilderService
      * @param array $parts
      * @return void
      */
-    function defineType(string $type, string $cardIcon = '', string $title = null, string $subtitle = null, string $description = null, string $requiredBackendUserGroup = null, array $parts = []): void {
+    function defineType(string $type, string $cardIcon = '', string $title = null, string $subtitle = null, string $description = null, string $requiredBackendUserGroup = null, $pageUidFromSiteSetting = null, array $parts = []): void {
         $GLOBALS['TCA']['tx_easyconf_configuration']['types'][$type] =
             [
                 'showitem' => implode(', ', $parts),
@@ -79,6 +80,7 @@ class TcaBuilderService
                 'description' => $description ?? ($this->l10nFile . ':type_' . $type . '_description'),
                 'cardIcon' => $cardIcon,
                 'requiredBackendUserGroup' => $requiredBackendUserGroup ?? '',
+                'pageUidFromSiteSetting' => $pageUidFromSiteSetting ?? '',
             ];
     }
 
