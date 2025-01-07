@@ -301,7 +301,11 @@ class TcaBuilderService
         foreach ($this->propertyMap as $property) {
             if($property['mapper'] === TypoScriptConstantMapper::class) {
                 foreach ($property['fieldPropertyMap'] as $field => $propertyName) {
-                    $content .= "{$property['path']}.{$propertyName} = " . ($property['fieldModifyMap'][$field]['default'] ?? "") . "\n";
+                    if($property['fieldModifyMap'][$field]['defaultReference'] ?? false) {
+                        $content .= "{$property['path']}.{$propertyName} < " . $property['fieldModifyMap'][$field]['defaultReference'] . "\n";
+                    } else {
+                        $content .= "{$property['path']}.{$propertyName} = " . ($property['fieldModifyMap'][$field]['default'] ?? "") . "\n";
+                    }
                 }
             }
         }
