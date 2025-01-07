@@ -98,6 +98,11 @@ class TypoScriptService implements SingletonInterface, MapperServiceInterface, L
         $this->updateTemplateConstants($this->templateRow['constants']);
     }
 
+    public function getSite(): ?Site
+    {
+        return $this->site;
+    }
+
     protected function updateTemplateConstants(string $constants): void
     {
         GeneralUtility::makeInstance(ConnectionPool::class)

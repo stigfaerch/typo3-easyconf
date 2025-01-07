@@ -17,6 +17,7 @@ use Buepro\Easyconf\Mapper\Utility\TypoScriptConstantMapperUtility;
 use Buepro\Easyconf\Service\FileService;
 use Buepro\Easyconf\Utility\GeneralUtility as EasyconfGeneralUtility;
 use Buepro\Easyconf\Utility\TcaUtility;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\SingletonInterface;
@@ -123,10 +124,19 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
         return $relativePath . $fileName;
     }
 
+    protected function getStorage(): string
+    {
+        if($this->typoScriptService->getSite() && GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('easyconf')['useSiteIdentifierAsStorageSubfolder'] ?? false) {
+            return $this->storage . $this->typoScriptService->getSite()->getIdentifier() . '/';
+        } else {
+            return $this->storage;
+        }
+    }
+
     protected function getFileWithAbsolutePath(): string
     {
         return GeneralUtility::getFileAbsFileName(
-            $this->storage . $this->fileService->getTemplateFileName(self::FILE_NAME)
+            $this->getStorage() . $this->fileService->getTemplateFileName(self::FILE_NAME)
         );
     }
 

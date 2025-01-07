@@ -6,3 +6,6 @@
 
 # cat=basic/; type=boolean; label=Enable palette styling override: If enabled, you can override tag for palette label and colClass for elements in a palette
      enablePaletteStylingOverrideFeature = 0
+
+# cat=basic/; type=boolean; label=Use site identifier as storage subfolder: If enabled, storage for typoscript constants will be fileadmin/easyconf/Configuration/TypoScript/{site-identifier}/
+    useSiteIdentifierAsStorageSubfolder = 0
