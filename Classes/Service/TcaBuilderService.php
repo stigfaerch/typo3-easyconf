@@ -66,18 +66,20 @@ class TcaBuilderService
      * @param string|null $title
      * @param string|null $subtitle
      * @param string|null $description
+     * @param string|null $requiredBackendUserGroup
      * @param array $parts
      * @return void
      */
-    function defineType(string $type, string $cardIcon = '', string $title = null, string $subtitle = null, string $description = null, array $parts = []): void {
+    function defineType(string $type, string $cardIcon = '', string $title = null, string $subtitle = null, string $description = null, string $requiredBackendUserGroup = null, array $parts = []): void {
         $GLOBALS['TCA']['tx_easyconf_configuration']['types'][$type] =
-         [
-            'showitem' => implode(', ', $parts),
-            'title' => $title ?? ($this->l10nFile . ':type_' . $type . '_title'),
-            'subtitle' => $subtitle ?? ($this->l10nFile . ':type_' . $type . '_subtitle'),
-            'description' => $description ?? ($this->l10nFile . ':type_' . $type . '_description'),
-            'cardIcon' => $cardIcon,
-        ];
+            [
+                'showitem' => implode(', ', $parts),
+                'title' => $title ?? ($this->l10nFile . ':type_' . $type . '_title'),
+                'subtitle' => $subtitle ?? ($this->l10nFile . ':type_' . $type . '_subtitle'),
+                'description' => $description ?? ($this->l10nFile . ':type_' . $type . '_description'),
+                'cardIcon' => $cardIcon,
+                'requiredBackendUserGroup' => $requiredBackendUserGroup ?? '',
+            ];
     }
 
     /**

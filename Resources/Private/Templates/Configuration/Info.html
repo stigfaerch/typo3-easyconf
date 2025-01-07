@@ -33,39 +33,32 @@
 </f:section>
 
 <f:section name="options">
+    <f:be.security.ifHasRole role="">
+        <h1>nyhedsbrev aktiveret</h1>
+    </f:be.security.ifHasRole>
     <f:for each="{sites}" as="site">
         <f:if condition="{types -> f:count()} > 1">
             <f:then>
                 <h2>{site.rootPageTitle}</h2>
                 <div class="card-container">
                     <f:for each="{types}" as="typeData" key="typeKey">
-                        <div class="card card-size-fixed-small">
-                            <div class="card-header">
-                                <div class="card-icon">
-                                    <f:render section="groupIcon" arguments="{_all}" />
-                                </div>
-                                <div class="card-header-body">
-                                    <h2 class="card-title">{f:translate(key: '{typeData.title}')}</h2>
-                                    <span class="card-subtitle">{f:translate(key: '{typeData.subtitle}')}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">{f:translate(key: '{typeData.description}')}</p>
-                            </div>
-                            <div class="card-footer">
-                                <easyconf:link.editRecord
-                                    class="btn btn-primary"
-                                    data="{inline:1}"
-                                    returnUrl="{f:be.uri(route: 'web_Easyconf')}"
-                                    table="tx_easyconf_configuration"
-                                    uid="{site.configurationUid}"
-                                    group="{typeKey}"
-                                >
-                                    <f:variable name="groupTitle"><f:format.case mode="lower" ><f:translate key="{typeData.title}" /></f:format.case></f:variable>
-                                    <f:format.printf arguments="{groupTitle: groupTitle}">{f:translate(key: 'editGroup')}</f:format.printf>
-                                </easyconf:link.editRecord>
-                            </div>
-                        </div>
+                        <f:if condition="{typeData.requiredBackendUserGroup}">
+                            <f:then>
+                                <f:be.security.ifHasRole role="{typeData.requiredBackendUserGroup}">
+                                    <f:then>
+                                        <f:render section="card" arguments="{_all}" />
+                                    </f:then>
+                                    <f:else>
+                                        <f:if condition="{isAdmin}">
+                                            <f:render section="card" arguments="{_all}" />
+                                        </f:if>
+                                    </f:else>
+                                </f:be.security.ifHasRole>
+                            </f:then>
+                            <f:else>
+                                <f:render section="card" arguments="{_all}" />
+                            </f:else>
+                        </f:if>
                     </f:for>
                 </div>
             </f:then>
@@ -85,6 +78,37 @@
     <f:if condition="{isAdmin}">
         <a class="btn btn-primary mb-2" href="{be:moduleLink(route: 'web_ts', arguments: '{id: pageUid}')}">{f:translate(key: 'switchTemplateModule')}</a>
     </f:if>
+</f:section>
+
+
+<f:section name="card">
+    <div class="card card-size-fixed-small">
+        <div class="card-header">
+            <div class="card-icon">
+                <f:render section="groupIcon" arguments="{_all}" />
+            </div>
+            <div class="card-header-body">
+                <h2 class="card-title">{f:translate(key: '{typeData.title}')}</h2>
+                <span class="card-subtitle">{f:translate(key: '{typeData.subtitle}')}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="card-text">{f:translate(key: '{typeData.description}')}</p>
+        </div>
+        <div class="card-footer">
+            <easyconf:link.editRecord
+                class="btn btn-primary"
+                data="{inline:1}"
+                returnUrl="{f:be.uri(route: 'web_Easyconf')}"
+                table="tx_easyconf_configuration"
+                uid="{site.configurationUid}"
+                group="{typeKey}"
+            >
+                <f:variable name="groupTitle"><f:format.case mode="lower" ><f:translate key="{typeData.title}" /></f:format.case></f:variable>
+                <f:format.printf arguments="{groupTitle: groupTitle}">{f:translate(key: 'editGroup')}</f:format.printf>
+            </easyconf:link.editRecord>
+        </div>
+    </div>
 </f:section>
 
 <f:section name="groupIcon">
