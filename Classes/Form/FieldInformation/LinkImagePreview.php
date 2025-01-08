@@ -31,8 +31,8 @@ class LinkImagePreview extends AbstractNode
                 $content = '';
             }
             if($thumbUrl ?? false) {
-                $content = '<div class="col-md-12"><div style="width: 450px; height:300px; background-image: url(\'' . $thumbUrl . '\'); background-position: left center; background-size: contain;
-                background-repeat: no-repeat;"/></div>';
+                $content = '<div class="col-md-12"><div style="width: 450px; height:300px; background-color:#bbbbbb"><div style="width: 450px; height:300px; background-image: url(\'' . $thumbUrl . '\'); background-position: left center; background-size: contain;
+                background-repeat: no-repeat;"/></div></div>';
             }
         };
         return ['html' => $content ?? ''];
