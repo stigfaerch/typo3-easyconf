@@ -235,6 +235,9 @@ class TcaBuilderService
             } else {
                 $newProperties[] = $newPropertiesForPropertyMap[] = $key;
                 $value['config'] = $value['config'] ?? [];
+                if($value['displayCond'] ?? false) {
+                    $value['displayCond'] = $value['displayCond'];
+                }
                 $this->addFieldInformationConfiguration($value['config']);
                 $modify[] = $value;
             }

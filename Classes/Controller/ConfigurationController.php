@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
@@ -119,7 +120,9 @@ class ConfigurationController extends ActionController
 
                 foreach ($GLOBALS['TCA']['tx_easyconf_configuration']['types'] as $key => $type) {
                     if($type['pageUidFromSiteSetting'] ?? false) {
-                        $pid = ArrayUtility::getValueByPath($site->getSettings()->getAll(), $type['pageUidFromSiteSetting'], '.');
+                        try {
+                            $pid = ArrayUtility::getValueByPath($site->getSettings()->getAll(), $type['pageUidFromSiteSetting'], '.');
+                        } catch (MissingArrayPathException $e) { $pid = null;}
                         $typeToConfigurationUidMap[$key] = self::getConfigurationUid($pid) ?? $configurationUid;
                     } else {
                         $typeToConfigurationUidMap[$key] = $configurationUid;
