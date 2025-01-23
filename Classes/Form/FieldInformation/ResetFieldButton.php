@@ -2,6 +2,7 @@
 
 namespace Buepro\Easyconf\Form\FieldInformation;
 
+use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
 use TYPO3\CMS\Backend\Form\AbstractNode;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
@@ -20,9 +21,10 @@ class ResetFieldButton extends AbstractNode
          */
         $fieldElementName = "data{$this->data['elementBaseName']}";
         $resetId = "reset_{$this->data['fieldName']}";
-        $defaultValue = $GLOBALS['TCA']['tx_easyconf_configuration']['columns'][$this->data['fieldName']]['default'] ?? false;
+        $fieldConfig =& $GLOBALS['TCA']['tx_easyconf_configuration']['columns'][$this->data['fieldName']];
+        $defaultValue = $fieldConfig['default'] ?? false;
         $currentValue = $this->data['parameterArray']['itemFormElValue'];
-        if ((!$defaultValue && $currentValue == '')  OR $defaultValue == $currentValue) {
+        if (($fieldConfig['tx_easyconf']['mapper'] !== TypoScriptConstantMapper::class) OR (!$defaultValue && $currentValue == '')  OR ($defaultValue == $currentValue)) {
             return ['html' => ''];
         }
         $iconPath = \TYPO3\CMS\Core\Utility\PathUtility::getPublicResourceWebPath('EXT:core/Resources/Public/Icons/T3Icons/svgs/actions/actions-undo.svg');
