@@ -60,6 +60,19 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
         return $this;
     }
 
+    protected function getFileContents(): array
+    {
+        $lines = file($this->getFileWithAbsolutePath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $content = [];
+        foreach ($lines as $line) {
+            if(!str_starts_with($line, '#') && str_contains($line, '=')) {
+                list($key, $value) = GeneralUtility::trimExplode('=', $line);
+                $content[$key] = $value;
+            }
+        }
+        return $content;
+    }
+
     protected function initializeImportStatementHandling(): self
     {
         $importStatementHandling = trim($this->typoScriptService->getConstantByPath(
@@ -149,8 +162,9 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
             $this->typoScriptService->getTemplateRow()['uid']
         );
         ksort($this->buffer[self::PROPERTY_BUFFER_KEY]);
-        foreach ($this->buffer[self::PROPERTY_BUFFER_KEY] as $path => $value) {
-            $content[] = sprintf('%s = %s', $path, $value);
+        $constants = array_merge($this->getFileContents(), $this->buffer[self::PROPERTY_BUFFER_KEY]);
+        foreach ($constants as $path => $value) {
+            if($value !== '??') $content[] = sprintf('%s = %s', $path, $value);
         }
         foreach ($this->buffer[self::SCRIPT_BUFFER_KEY] as $value) {
             $content[] = $value;
@@ -171,7 +185,7 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
             $this->typoScriptService->getTemplateRow()['uid'],
         );
         $tokenAndImportStatement = sprintf("%s\r\n@import '%s'", self::TEMPLATE_TOKEN, $fileName);
-        $constantsContainsToken = strpos($constants, self::TEMPLATE_TOKEN) !== false;
+        $constantsContainsToken = str_contains($constants, self::TEMPLATE_TOKEN);
         if ($constantsContainsToken && $this->importStatementHandling !== 'maintainAtEnd') {
             return;
         }
