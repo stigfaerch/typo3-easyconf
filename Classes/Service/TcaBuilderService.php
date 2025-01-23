@@ -239,6 +239,7 @@ class TcaBuilderService
                     $value['displayCond'] = $value['displayCond'];
                 }
                 $this->addFieldInformationConfiguration($value['config']);
+                $this->addFieldWizardConfiguration($value['config']);
                 $modify[] = $value;
             }
         }
@@ -341,6 +342,7 @@ class TcaBuilderService
     {
         $config = $config ?? [];
         $this->addFieldInformationConfiguration($config);
+        $this->addFieldWizardConfiguration($config);
         $propConfig = ['property' => $property, 'helpText' => $helpText, 'config' => $config];
         return array_replace_recursive($propConfig, $propModify);
     }
@@ -351,4 +353,11 @@ class TcaBuilderService
             $config['fieldInformation'] ?? [],
             [['renderType' => 'staticText']]);
     }
+    protected function addFieldWizardConfiguration(&$config): void {
+        if(!is_array($config)) { return;}
+        $config['fieldWizard'] = array_merge(
+            $config['fieldWizard'] ?? [],
+            [['renderType' => 'resetFieldButton'],]);
+    }
+
 }
