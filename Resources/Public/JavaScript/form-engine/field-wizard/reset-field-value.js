@@ -27,7 +27,8 @@ class ResetFieldValue {
 
     registerEventHandler(nameAttributeToMatch, resetId) {
         const resetIdElement = document.querySelector('a#' + resetId);
-        new RegularEvent("click", ((e) => {
+
+        const callBack = function (e) {
             e.preventDefault();
             const inputHidden = document.createElement('input');
             inputHidden.setAttribute('name', nameAttributeToMatch);
@@ -35,12 +36,20 @@ class ResetFieldValue {
             inputHidden.value = '??'
 
             const span = document.createElement('span');
-            span.innerHTML = '&nbsp;Gem for at gennemføre nulstilling af feltet.'
+            span.innerHTML = '&nbsp;Gem for at gennemføre gendannelse af oprindelig værdi.'
 
             resetIdElement.after(span);
             resetIdElement.after(inputHidden);
-        }))
-            .bindTo(resetIdElement);
+        }
+
+        const oneTimeCallback = function (e) {
+            callBack(e);
+            clickEvent.release();
+        }
+
+        const clickEvent = new RegularEvent("click", oneTimeCallback);
+
+        clickEvent.bindTo(resetIdElement);
     }
 }
 
