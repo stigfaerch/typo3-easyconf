@@ -66,7 +66,7 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
         $content = [];
         foreach ($lines as $line) {
             if(!str_starts_with($line, '#') && str_contains($line, '=')) {
-                list($key, $value) = GeneralUtility::trimExplode('=', $line);
+                list($key, $value) = GeneralUtility::trimExplode('=', $line, false, 2);
                 $content[$key] = $value;
             }
         }
