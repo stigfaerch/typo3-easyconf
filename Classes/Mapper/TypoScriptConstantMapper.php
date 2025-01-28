@@ -62,7 +62,7 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
 
     protected function getFileContents(): array
     {
-        $lines = file($this->getFileWithAbsolutePath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $lines = @file($this->getFileWithAbsolutePath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
         $content = [];
         foreach ($lines as $line) {
             if(!str_starts_with($line, '#') && str_contains($line, '=')) {
