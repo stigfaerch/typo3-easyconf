@@ -9,3 +9,7 @@
 
 # cat=basic/; type=boolean; label=Use site identifier as storage subfolder: If enabled, storage for typoscript constants will be fileadmin/easyconf/Configuration/TypoScript/{site-identifier}/
     useSiteIdentifierAsStorageSubfolder = 0
+
+# cat=basic/; type=boolean; label=Automatically add and use site identifier page cache tag: If enabled, cache will only be flushed for the pages of the site belonging to the changed configuration.
+    addAndUseSiteIdentifierPageCacheTag = 0
+

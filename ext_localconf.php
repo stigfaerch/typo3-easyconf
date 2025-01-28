@@ -67,4 +67,15 @@ defined('TYPO3') || die('Access denied.');
         ];
     }
 
+    if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['addAndUseSiteIdentifierPageCacheTag'] ?? false) {
+        ExtensionManagementUtility::addTypoScriptSetup('
+        page {
+            # add custom page cache tags
+            1737974780 = TEXT
+            1737974780.addPageCacheTags.data = site:identifier
+            1737974780.addPageCacheTags.wrap = siteIdentifier_|
+        }
+        ');
+    };
+
 })();

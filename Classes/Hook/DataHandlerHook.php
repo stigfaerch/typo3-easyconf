@@ -23,7 +23,9 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
@@ -94,7 +96,16 @@ class DataHandlerHook implements SingletonInterface
             if ((bool)GeneralUtility::makeInstance(TypoScriptConstantMapper::class)->getProperty(
                 'module.tx_easyconf.persistence.clearPageCache'
             )) {
-                GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroup('pages');
+                if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['addAndUseSiteIdentifierPageCacheTag'] ?? false) {
+                    try {
+                        $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($configurationRecord['pid']);
+                        GeneralUtility::makeInstance(CacheManager::class)->getCache('typoscript')->flush();
+                        GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroupByTag('pages', 'siteIdentifier_' . $site->getIdentifier());
+                    } catch (SiteNotFoundException $e) {}
+                } else {
+                    GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroup('pages');
+                }
+
             }
         }
     }
