@@ -21,7 +21,7 @@ class PropertyFieldMap implements SingletonInterface
 
     public function __construct()
     {
-        foreach ($GLOBALS['TCA']['tx_easyconf_configuration']['columns'] as $fieldName => $fieldConfig) {
+        foreach ($GLOBALS['TCA']['tx_easyconf_configuration']['columns'] ?? [] as $fieldName => $fieldConfig) {
             if (($path = $fieldConfig['tx_easyconf']['path'] ?? '') !== '') {
                 $this->fieldPropertyMap[$fieldName] = $path;
             }
