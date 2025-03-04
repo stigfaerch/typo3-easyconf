@@ -104,7 +104,7 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
         $this->removePropertyFromBuffer($path);
         $mapAlways = ($fieldName = $this->propertyFieldMap->getFieldName($path)) !== null &&
             (bool)(TcaUtility::getColumnConfiguration($fieldName)['mapAlways'] ?? false);
-        if ($mapAlways || $this->getInheritedProperty($path) !== $value) {
+        if ($mapAlways || $this->getInheritedProperty($path) !== $value || $value === '') {
             $this->buffer[self::PROPERTY_BUFFER_KEY][$path] = $value;
         }
         return $this;
