@@ -18,6 +18,7 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -27,10 +28,6 @@ use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
 class ConfigurationController extends ActionController
 {
-    protected ModuleTemplateFactory $moduleTemplateFactory;
-    protected ConfigurationRepository $configurationRepository;
-    protected PageRepository $pageRepository;
-    protected DatabaseService $databaseService;
     protected ?int $pageUid;
     protected ?int $templateUid;
     protected ?array $configuration;
@@ -40,16 +37,12 @@ class ConfigurationController extends ActionController
     protected bool $multipleTypes = false;
 
     public function __construct(
-        ModuleTemplateFactory $moduleTemplateFactory,
-        ConfigurationRepository $configurationRepository,
-        PageRepository $pageRepository,
-        DatabaseService $databaseService
-    ) {
-        $this->moduleTemplateFactory = $moduleTemplateFactory;
-        $this->configurationRepository = $configurationRepository;
-        $this->pageRepository = $pageRepository;
-        $this->databaseService = $databaseService;
-    }
+        protected readonly ModuleTemplateFactory $moduleTemplateFactory,
+        protected readonly ConfigurationRepository $configurationRepository,
+        protected readonly PageRepository $pageRepository,
+        protected readonly DatabaseService $databaseService,
+        protected readonly PageRenderer $pageRenderer,
+    ) {}
 
     public function initializeAction(): void
     {
