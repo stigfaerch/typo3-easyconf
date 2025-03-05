@@ -47,6 +47,9 @@ class ConfigurationController extends ActionController
     public function initializeAction(): void
     {
         parent::initializeAction();
+        if($moduleStylingFilepath = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['moduleStylingFilePath'] ?? false) {
+            $this->pageRenderer->addCssFile($moduleStylingFilepath);
+        }
         $this->hidePageNavigation = (bool)\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['hidePageNavigation'] ?? false;
         $this->multipleTypes = count($GLOBALS['TCA']['tx_easyconf_configuration']['types']) > 1;
         $this->pageUid = (int)($this->request->getQueryParams()['id'] ?? 0);
