@@ -104,7 +104,8 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
         $this->removePropertyFromBuffer($path);
         $mapAlways = ($fieldName = $this->propertyFieldMap->getFieldName($path)) !== null &&
             (bool)(TcaUtility::getColumnConfiguration($fieldName)['mapAlways'] ?? false);
-        if ($mapAlways || $this->getInheritedProperty($path) !== $value || $value === '') {
+//        if ($mapAlways || $this->getInheritedProperty($path) !== $value || $value === '') {
+        if ($mapAlways || $this->getProperty($path) !== $value || $value === '') {
             $this->buffer[self::PROPERTY_BUFFER_KEY][$path] = $value;
         }
         return $this;
@@ -164,7 +165,7 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
         ksort($this->buffer[self::PROPERTY_BUFFER_KEY]);
         $constants = array_merge($this->getFileContents(), $this->buffer[self::PROPERTY_BUFFER_KEY]);
         foreach ($constants as $path => $value) {
-            if($value !== '??') $content[] = sprintf('%s = %s', $path, $value);
+            if($value !== '??' && $this->getInheritedProperty($path) !== $value) $content[] = sprintf('%s = %s', $path, $value);
         }
         foreach ($this->buffer[self::SCRIPT_BUFFER_KEY] as $value) {
             $content[] = $value;
