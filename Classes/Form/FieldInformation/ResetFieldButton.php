@@ -24,6 +24,7 @@ class ResetFieldButton extends AbstractNode
         $fieldConfig =& $GLOBALS['TCA']['tx_easyconf_configuration']['columns'][$this->data['fieldName']];
         $defaultValue = $fieldConfig['default'] ?? false;
         $currentValue = $this->data['parameterArray']['itemFormElValue'];
+        $currentValue = is_array($currentValue) ? ($currentValue[0] ?? false) : $currentValue;
         if (($fieldConfig['tx_easyconf']['mapper'] !== TypoScriptConstantMapper::class) OR (!$defaultValue && $currentValue == '')  OR ($defaultValue == $currentValue)) {
             return ['html' => ''];
         }
