@@ -13,7 +13,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class ResetFieldButton extends AbstractNode
 {
 
-    public function render()
+    public function render(): array
     {
         /**
          * TODO

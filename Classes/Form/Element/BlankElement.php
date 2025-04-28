@@ -10,7 +10,7 @@ class BlankElement extends AbstractFormElement
     /**
      * @inheritDoc
      */
-    public function render()
+    public function render(): array
     {
         $resultArray['html'] = '&nbsp;';
         $resultArray['labelHasBeenHandled'] = true;

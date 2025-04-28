@@ -10,7 +10,7 @@ class StaticTextElement extends AbstractFormElement
     /**
      * @inheritDoc
      */
-    public function render()
+    public function render(): array
     {
         $resultArray['html'] = '';
         $parameterArray = $this->data['parameterArray'] ?? [];

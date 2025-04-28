@@ -13,7 +13,7 @@ class LinkImagePreview extends AbstractNode
     /**
      * @inheritDoc
      */
-    public function render()
+    public function render(): array
     {
         $linkService = GeneralUtility::makeInstance(LinkService::class);
         if($file = $linkService->resolve($this->data['parameterArray']['itemFormElValue'])['file'] ?? false) {
