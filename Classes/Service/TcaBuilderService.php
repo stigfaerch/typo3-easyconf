@@ -14,7 +14,7 @@ class TcaBuilderService
 {
     const constantDefaultFilename = 'constant_default.typoscript';
 
-    protected string $l10nFile;
+    protected string $l10nFile = '';
     protected ?array $paletteHeaderTagConfig = null;
 
     protected array $propertyMap = [];
