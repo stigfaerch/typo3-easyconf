@@ -72,12 +72,23 @@ class ConfigurationController extends ActionController
             'sites' => $this->getSitesData(),
             'agency' => $this->getAgencyData(),
             'isAdmin' => $GLOBALS['BE_USER']->isAdmin(),
-            'types' => $GLOBALS['TCA']['tx_easyconf_configuration']['types'],
+            'types' => $this->getAllowedTypes(),
             'multipleTypes' => $this->multipleTypes,
             'hidePageNavigation' => $this->hidePageNavigation,
         ]);
         return $moduleTemplate->renderResponse('Configuration/Info');
     }
+
+    private function getAllowedTypes(): array {
+        $types = $GLOBALS['TCA']['tx_easyconf_configuration']['types'];
+        $disallowedTypes = GeneralUtility::trimExplode(',', $GLOBALS['BE_USER']->getTSConfig()['mod.']['easyconf.']['disallowedTypesInBackendModule'] ?? '', true);
+        if(isset($GLOBALS['BE_USER']->getTSConfig()['mod.']['easyconf.']['allowedTypesInBackendModule'])) {
+            $allowedTypes = GeneralUtility::trimExplode(',', $GLOBALS['BE_USER']->getTSConfig()['mod.']['easyconf.']['allowedTypesInBackendModule'], true);
+            $types = array_filter($types, static fn ($typeKey) => in_array($typeKey, $allowedTypes), ARRAY_FILTER_USE_KEY);
+        }
+        return array_filter($types, static fn ($typeKey) => !in_array($typeKey, $disallowedTypes), ARRAY_FILTER_USE_KEY);
+    }
+
 
     public function editAction(): ResponseInterface
     {
