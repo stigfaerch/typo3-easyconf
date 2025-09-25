@@ -65,6 +65,7 @@ class ConfigurationController extends ActionController
     {
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->assignMultiple([
+            'cardView' => $GLOBALS['TCA']['tx_easyconf_configuration']['ctrl']['cardView'] ?? false,
             'pageUid' => $this->pageUid,
             'templateUid' => $this->templateUid,
             'queryParams' => $this->request->getQueryParams(),

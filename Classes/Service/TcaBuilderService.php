@@ -19,9 +19,10 @@ class TcaBuilderService
 
     protected array $propertyMap = [];
 
-    public function init(string $l10nFile): void
+    public function init(string $l10nFile, bool $cardView = true): void
     {
         $this->l10nFile = $l10nFile;
+        $GLOBALS['TCA']['tx_easyconf_configuration']['ctrl']['cardView'] = $cardView;
     }
 
     public function setPaletteHeaderTagConfig(string $tag, ?array $additionalAttributes = null): void

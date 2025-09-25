@@ -37,7 +37,7 @@
         <h1>nyhedsbrev aktiveret</h1>
     </f:be.security.ifHasRole>
     <f:for each="{sites}" as="site">
-        <f:if condition="{types -> f:count()} > 1">
+        <f:if condition="{cardView}">
             <f:then>
                 <h2>{site.rootPageTitle}</h2>
                 <div class="card-container">
