@@ -4,6 +4,7 @@ namespace Buepro\Easyconf\Form\Element;
 
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CreatePageButtonElement extends AbstractFormElement
@@ -83,10 +84,14 @@ JS;
         if($convertValue) {
             if(str_starts_with($value, 'site-settings:')) {
                 $targetPidFromSetting = substr($value, strlen('site-settings:'));
-                return GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getSettings()[$targetPidFromSetting] ?? false;
+                return GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getSettings()->getAllFlat()[$targetPidFromSetting] ?? false;
             } elseif (str_starts_with($value, 'site-configuration:')) {
                 $targetPidFromConfiguration = substr($value, strlen('site-configuration:'));
-                return GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getConfiguration()[$targetPidFromConfiguration] ?? false;
+                try {
+                    return \TYPO3\CMS\Core\Utility\ArrayUtility::getValueByPath(GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getConfiguration(), $targetPidFromConfiguration, '.');
+                } catch (MissingArrayPathException $e) {
+                    return null;
+                }
             }
         }
         return $value;
