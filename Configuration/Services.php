@@ -2,6 +2,7 @@
 
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use TYPO3\CMS\Backend\Controller\Event\ModifyPageLayoutContentEvent;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -28,6 +29,11 @@ return function (ContainerConfigurator $container, ContainerBuilder $containerBu
         ->addTag('event.listener', [
             'identifier' => 'buepro/easyconf/exclude-from-indexing',
             'event' => \TYPO3\CMS\Core\DataHandling\Event\IsTableExcludedFromReferenceIndexEvent::class
+        ]);
+    $containerBuilder->registerForAutoconfiguration(\Buepro\Easyconf\EventListener\RefreshPageTree::class)
+        ->addTag('event.listener', [
+            'identifier' => 'buepro/easyconf/refresh-page-tree',
+            'event' => 'TYPO3\CMS\Backend\Controller\Event\ModifyPageLayoutContentEvent'
         ]);
 
     if((GeneralUtility::makeInstance(Typo3Version::class))->getMajorVersion() == 12) {

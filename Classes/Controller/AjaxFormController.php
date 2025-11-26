@@ -8,8 +8,10 @@ use Buepro\Easyconf\Mapper\Service\SiteSettingsService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -70,6 +72,7 @@ final class AjaxFormController
         $dataHandler = $this->getDataHandler();
 
         $dataHandler->start($data, $cmd, $adminBeUser);
+        $dataHandler->copyTree = 10;
         $dataHandler->process_datamap();
         $dataHandler->process_cmdmap();
 
@@ -83,6 +86,8 @@ final class AjaxFormController
             $dataHandler->process_datamap();
             $dataHandler->process_cmdmap();
         }
+
+        GeneralUtility::makeInstance(Registry::class)->set('easyconf_pagetree', 'update', true);
         if($newPageUid ?? false) return $newPageUid;
         return 0;
     }
