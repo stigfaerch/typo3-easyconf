@@ -329,6 +329,9 @@ class TcaBuilderService
 
     protected function convertOptionsToItemsArray($options, $keyForKey = 'value', $keyForValue = 'label' ): array
     {
+        if(is_array($options[0] ?? null)){
+            return $options;
+        }
         $callback = fn(string $k, string $v): array => [$keyForKey => $k, $keyForValue => $v];
         return array_map($callback, array_keys($options), array_values($options));
     }
