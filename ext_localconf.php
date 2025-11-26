@@ -60,6 +60,11 @@ defined('TYPO3') || die('Access denied.');
         'priority' => 40,
         'class' => \Buepro\Easyconf\Form\FieldInformation\ResetFieldButton::class,
     ];
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1732195000] = [
+        'nodeName' => 'createPageButton',
+        'priority' => 40,
+        'class' => \Buepro\Easyconf\Form\Element\CreatePageButtonElement::class,
+    ];
 
     if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['enablePaletteStylingOverrideFeature'] ?? 0) {
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\Form\Container\PaletteAndSingleContainer::class] = [

@@ -98,4 +98,12 @@ abstract class AbstractSiteConfigurationService implements SingletonInterface, M
             $this->siteData = $this->load();
         }
     }
+
+    public function addAndSaveValue($path, $value, $delimiter = '.'): void
+    {
+        if ($this->siteConfiguration !== null && $this->getSite() !== null) {
+            $data = ArrayUtility::setValueByPath($this->siteData, $path, $value, $delimiter);
+            $this->write($data);
+        }
+    }
 }

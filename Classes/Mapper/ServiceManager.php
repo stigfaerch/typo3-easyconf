@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Buepro\Easyconf\Mapper;
 
 use Buepro\Easyconf\Mapper\Service\EasyconfService;
+use Buepro\Easyconf\Mapper\Service\RecordService;
 use Buepro\Easyconf\Mapper\Service\SiteConfigurationService;
 use Buepro\Easyconf\Mapper\Service\SiteSettingsService;
 use Buepro\Easyconf\Mapper\Service\TypoScriptService;
@@ -24,6 +25,7 @@ class ServiceManager implements SingletonInterface
     protected ?SiteConfigurationService $siteConfigurationService;
     protected ?SiteSettingsService $siteSettingsService;
     protected ?EasyconfService $easyconfService;
+    protected ?RecordService $recordService;
 
     public function init(int $pageUid): bool
     {
@@ -35,13 +37,16 @@ class ServiceManager implements SingletonInterface
         $this->siteSettingsService = GeneralUtility::makeInstance(SiteSettingsService::class)->init($pageUid);
         /** @extensionScannerIgnoreLine */
         $this->easyconfService = GeneralUtility::makeInstance(EasyconfService::class)->init($pageUid);
+        /** @extensionScannerIgnoreLine */
+        $this->recordService = GeneralUtility::makeInstance(RecordService::class)->init($pageUid);
+
         return $this->servicesAvailable();
     }
 
     public function servicesAvailable(): bool
     {
         return $this->typoScriptService !== null && $this->siteConfigurationService !== null &&
-            $this->easyconfService !== null;
+            $this->siteSettingsService !== null && $this->easyconfService !== null && $this->recordService !== null;
     }
 
     public function getTypoScriptService(): ?TypoScriptService
@@ -49,9 +54,19 @@ class ServiceManager implements SingletonInterface
         return $this->typoScriptService;
     }
 
+    public function getRecordService(): ?RecordService
+    {
+        return $this->recordService;
+    }
+
     public function getSiteConfigurationService(): ?SiteConfigurationService
     {
         return $this->siteConfigurationService;
+    }
+
+    public function getSiteSettingsService(): ?SiteSettingsService
+    {
+        return $this->siteSettingsService;
     }
 
     public function getEasyconfService(): ?EasyconfService

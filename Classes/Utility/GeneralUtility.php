@@ -12,6 +12,11 @@ declare(strict_types=1);
 namespace Buepro\Easyconf\Utility;
 
 use Buepro\Easyconf\Utility\GeneralUtility as EasyconfGeneralUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility as CoreGeneralUtility;
 
 class GeneralUtility
@@ -58,5 +63,51 @@ class GeneralUtility
             EasyconfGeneralUtility::convertToWindowsLineBreaks($content),
             $changePermissions
         );
+    }
+
+    public static function initAdmin($userIdToSet) {
+        $newBeUser = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(BackendUserAuthentication::class); // New backend user object
+        $newBeUser->setBeUserByUid($userIdToSet);
+        $newBeUser->fetchGroupData();
+
+        // setting the user to admin rights temporarily during copy. The reason is that everything must be copied fully!
+        $newBeUser->user['admin'] = 1;
+        return $newBeUser;
+    }
+
+    public static function getValue($currentPageId, $valueData)
+    {
+        if (is_string($valueData)) {
+            // When $valueData is a string but does not contain a semicolon
+            if (!str_contains($valueData, ':')) {
+                return $valueData;
+            // When used in the PagesService class
+            } else {
+                $params = explode(':', $valueData);
+                $source = $params[0];
+                $key = $params[1];
+            }
+        // When used with displayCond. For example DisplayConditionFunctions->doesPageNotExist:site-configuration:pids.secondary-menu
+        } elseif (is_array($valueData)) {
+            $source = $valueData['conditionParameters'][0];
+            $key = $valueData['conditionParameters'][1];
+        } else {
+            return null;
+        }
+
+        $site = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($currentPageId);
+        switch ($source) {
+            case 'site-settings':
+                return $site->getSettings()->get($key, false);
+            case 'site-configuration':
+                try {
+                    return ArrayUtility::getValueByPath($site->getConfiguration(), $key, '.');
+                } catch (MissingArrayPathException $exception) {}
+            default:
+                return throw new Exception(
+                    'conditionParameters[0] must be either site-settings or site-configuration',
+                    1707305657
+                );
+        }
     }
 }
