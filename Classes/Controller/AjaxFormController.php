@@ -87,6 +87,7 @@ final class AjaxFormController
             $dataHandler->process_cmdmap();
         }
 
+//        BackendUtility::setUpdateSignal('updatePageTree');
         GeneralUtility::makeInstance(Registry::class)->set('easyconf_pagetree', 'update', true);
         if($newPageUid ?? false) return $newPageUid;
         return 0;

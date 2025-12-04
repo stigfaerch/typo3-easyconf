@@ -98,11 +98,12 @@ class GeneralUtility
         $site = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($currentPageId);
         switch ($source) {
             case 'site-settings':
-                return $site->getSettings()->get($key, false);
+                return $site->getSettings()->get($key, null);
             case 'site-configuration':
                 try {
                     return ArrayUtility::getValueByPath($site->getConfiguration(), $key, '.');
                 } catch (MissingArrayPathException $exception) {}
+                return null;
             default:
                 return throw new Exception(
                     'conditionParameters[0] must be either site-settings or site-configuration',
