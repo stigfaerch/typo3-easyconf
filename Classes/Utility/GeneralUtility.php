@@ -13,7 +13,9 @@ namespace Buepro\Easyconf\Utility;
 
 use Buepro\Easyconf\Utility\GeneralUtility as EasyconfGeneralUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
@@ -21,6 +23,18 @@ use TYPO3\CMS\Core\Utility\GeneralUtility as CoreGeneralUtility;
 
 class GeneralUtility
 {
+    public static function flushPagesCache($pageId) {
+        if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['addAndUseSiteIdentifierPageCacheTag'] ?? false) {
+            try {
+                $site = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pageId);
+                \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class)->getCache('typoscript')->flush();
+                \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroupByTag('pages', 'siteIdentifier_' . $site->getIdentifier());
+            } catch (SiteNotFoundException $e) {}
+        } else {
+            \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroup('pages');
+        }
+    }
+
     /**
      * @return string Relative path in the form "relative/path/" or ""
      */

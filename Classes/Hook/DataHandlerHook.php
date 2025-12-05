@@ -97,16 +97,7 @@ class DataHandlerHook implements SingletonInterface
             if ((bool)GeneralUtility::makeInstance(TypoScriptConstantMapper::class)->getProperty(
                 'module.tx_easyconf.persistence.clearPageCache'
             )) {
-                if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['addAndUseSiteIdentifierPageCacheTag'] ?? false) {
-                    try {
-                        $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($configurationRecord['pid']);
-                        GeneralUtility::makeInstance(CacheManager::class)->getCache('typoscript')->flush();
-                        GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroupByTag('pages', 'siteIdentifier_' . $site->getIdentifier());
-                    } catch (SiteNotFoundException $e) {}
-                } else {
-                    GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroup('pages');
-                }
-
+                \Buepro\Easyconf\Utility\GeneralUtility::flushPagesCache($configurationRecord['pid']);
             }
         }
     }
