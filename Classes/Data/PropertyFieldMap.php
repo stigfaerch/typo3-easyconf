@@ -34,6 +34,11 @@ class PropertyFieldMap implements SingletonInterface
         return $this->propertyFieldMap[$propertyPath] ?? null;
     }
 
+    public function getConfigurationFromPropertyPath(string $propertyPath): array
+    {
+        return $GLOBALS['TCA']['tx_easyconf_configuration']['columns'][$this->getFieldName($propertyPath)] ?? [];
+    }
+
     public function getPropertyPath(string $fieldName): ?string
     {
         return $this->fieldPropertyMap[$fieldName] ?? null;

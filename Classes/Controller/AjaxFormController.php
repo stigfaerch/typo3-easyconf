@@ -8,10 +8,8 @@ use Buepro\Easyconf\Mapper\Service\SiteSettingsService;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception;
-use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -28,7 +26,6 @@ final class AjaxFormController
         $newPageTitle = $request->getParsedBody()['newPageTitle'];
 
         $newPidSettingPath = $request->getParsedBody()['newPidSettingPath'];
-
 
         if($copySourcePid = $request->getParsedBody()['copySourcePid'] ?? false) {
             if($newPageUid = $this->createNewPageFromCopy($copySourcePid, $targetPid, $newPageTitle)) {
@@ -87,8 +84,9 @@ final class AjaxFormController
             $dataHandler->process_cmdmap();
         }
 
-//        BackendUtility::setUpdateSignal('updatePageTree');
-        GeneralUtility::makeInstance(Registry::class)->set('easyconf_pagetree', 'update', true);
+        $GLOBALS['BE_USER']->uc['easyconf_pagetree_refresh'] = true;
+        $GLOBALS['BE_USER']->writeUC();
+
         if($newPageUid ?? false) return $newPageUid;
         return 0;
     }

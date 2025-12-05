@@ -11,13 +11,29 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Mapper;
 
+use Buepro\Easyconf\Data\PropertyFieldMap;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 abstract class AbstractMapper implements MapperInterface
 {
     protected array $buffer = [];
 
+    private ?PropertyFieldMap $propertyFieldMap = null;
+
+
     public function __construct()
     {
         MapperRegistry::registerInstance($this);
+    }
+
+    public function injectPropertyFieldMap(PropertyFieldMap $propertyFieldMap): void
+    {
+        $this->propertyFieldMap = $propertyFieldMap;
+    }
+
+    public function getPropertyFieldMap(): PropertyFieldMap
+    {
+        return $this->propertyFieldMap;
     }
 
     public function bufferProperty(string $path, $value): MapperInterface
@@ -30,5 +46,23 @@ abstract class AbstractMapper implements MapperInterface
     {
         unset($this->buffer[$path]);
         return $this;
+    }
+
+    public function processFuncAfterBufferPersisted($pid): array
+    {
+        $buffers = is_array(reset($this->buffer)) ? $this->buffer : [$this->buffer];
+        foreach ($buffers as $buffer) {
+            foreach ($buffer as $path => $value) {
+                if($config = $this->getPropertyFieldMap()->getConfigurationFromPropertyPath($path)) {
+                    if($config['postProcess'] ?? false) {
+                        $postProcess = (is_array(reset($config['postProcess']))) ? $config['postProcess'] : [$config['postProcess']];
+                        foreach ($postProcess ?? [] as $arguments) {
+                            GeneralUtility::makeInstance(array_shift($arguments), $config, $this, $pid);
+                        }
+                    }
+                }
+            }
+        }
+        return $this->buffer;
     }
 }

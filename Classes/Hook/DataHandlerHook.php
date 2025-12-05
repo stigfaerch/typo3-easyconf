@@ -92,6 +92,7 @@ class DataHandlerHook implements SingletonInterface
             self::$configurationData = null;
             foreach (MapperRegistry::getInstances() as $mapper) {
                 $mapper->persistBuffer();
+                $mapper->processFuncAfterBufferPersisted($configurationRecord['pid']);
             }
             if ((bool)GeneralUtility::makeInstance(TypoScriptConstantMapper::class)->getProperty(
                 'module.tx_easyconf.persistence.clearPageCache'

@@ -38,17 +38,14 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
     protected string $importStatementHandling = 'maintainAtEnd';
     protected TypoScriptService $typoScriptService;
     protected FileService $fileService;
-    protected PropertyFieldMap $propertyFieldMap;
 
     public function __construct(
         TypoScriptService $typoScriptService,
-        FileService $fileService,
-        PropertyFieldMap $propertyFieldMap
+        FileService $fileService
     ) {
         parent::__construct();
         $this->typoScriptService = $typoScriptService;
         $this->fileService = $fileService;
-        $this->propertyFieldMap = $propertyFieldMap;
         $this->initializeStorage()->initializeImportStatementHandling();
     }
 
@@ -102,7 +99,7 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
     public function bufferProperty(string $path, $value): MapperInterface
     {
         $this->removePropertyFromBuffer($path);
-        $mapAlways = ($fieldName = $this->propertyFieldMap->getFieldName($path)) !== null &&
+        $mapAlways = ($fieldName = $this->getPropertyFieldMap()->getFieldName($path)) !== null &&
             (bool)(TcaUtility::getColumnConfiguration($fieldName)['mapAlways'] ?? false);
         if ($mapAlways || $this->getProperty($path) !== $value) {
             $this->buffer[self::PROPERTY_BUFFER_KEY][$path] = $value;
