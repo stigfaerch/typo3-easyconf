@@ -62,7 +62,7 @@ final class AjaxFormController
         $cmd = [
             'pages' => [
                 $sourcePid => [
-                    'copy' => -$targetPid,
+                    'copy' => $targetPid,
                 ],
             ],
         ];
