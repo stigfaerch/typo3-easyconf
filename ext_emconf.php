@@ -16,12 +16,6 @@ $EM_CONF[$_EXTKEY] = [
     'clearCacheOnLoad' => 1,
     'author'           => 'Roman Büchler',
     'author_email'     => 'rb@buechler.pro',
-    'constraints'      => [
-        'depends'   => [
-            'typo3' => '12.4.0-13.99.99',
-        ],
-        'conflicts' => [],
-    ],
     'autoload' => [
         'psr-4' => [
             'Buepro\\Easyconf\\' => 'Classes'

@@ -11,15 +11,15 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Service;
 
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Exception;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class DatabaseService
 {
+    public function __construct(private readonly \TYPO3\CMS\Core\Database\ConnectionPool $connectionPool) {}
+
     public function getField(string $table, string $field, array $constraint): false|string|int|float
     {
-        $result = GeneralUtility::makeInstance(ConnectionPool::class)
+        $result = $this->connectionPool
             ->getConnectionForTable($table)
             ->select(
                 [$field],
@@ -34,7 +34,7 @@ class DatabaseService
 
     public function getRecord(string $table, array $constraint): ?array
     {
-        $result = GeneralUtility::makeInstance(ConnectionPool::class)
+        $result = $this->connectionPool
             ->getConnectionForTable($table)
             ->select(
                 ['*'],
@@ -46,7 +46,7 @@ class DatabaseService
 
     public function addRecord(string $table, array $fields, array $types = []): array
     {
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
+        $connection = $this->connectionPool->getConnectionForTable($table);
         $now = time();
         foreach (['tstamp', 'crdate'] as $fieldName) {
             if (!isset($fields[$fieldName])) {

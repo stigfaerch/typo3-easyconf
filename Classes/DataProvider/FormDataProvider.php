@@ -20,7 +20,6 @@ use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
 use Buepro\Easyconf\Utility\TcaUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Backend\Form\FormDataProviderInterface;
-use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -28,7 +27,7 @@ class FormDataProvider implements FormDataProviderInterface, SingletonInterface
 {
     protected EventDispatcherInterface $eventDispatcher;
 
-    public function injectEventDispatcher(EventDispatcherInterface $eventDispatcher): void
+    public function __construct(private readonly \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer, \Psr\EventDispatcher\EventDispatcherInterface $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -46,7 +45,7 @@ class FormDataProvider implements FormDataProviderInterface, SingletonInterface
             GeneralUtility::makeInstance(ServiceManager::class)->init($pageUid)
         ) {
             // Include JS to hide new and delete button
-            GeneralUtility::makeInstance(PageRenderer::class)
+            $this->pageRenderer
                 ->loadJavaScriptModule('@buepro/easyconf/FormDataProvider.js');
             // Read in properties
             foreach ($columns as $columnName => $columnConfig) {

@@ -25,6 +25,7 @@ class RecordService implements SingletonInterface, MapperServiceInterface
     protected array $configuration = [];
     protected array $fields = [];
     protected int $pageUid = 0;
+    public function __construct(private readonly \TYPO3\CMS\Core\Database\ConnectionPool $connectionPool) {}
 
     public function init(int $pageUid): self
     {
@@ -70,7 +71,7 @@ class RecordService implements SingletonInterface, MapperServiceInterface
     {
         foreach (ArrayUtility::flatten($this->fields) as $key => $value) {
             $config = $this->configuration[$key];
-            GeneralUtility::makeInstance(ConnectionPool::class)
+            $this->connectionPool
                 ->getConnectionForTable($config['RecordMapper']['table'])
                 ->update(
                     $config['RecordMapper']['table'],

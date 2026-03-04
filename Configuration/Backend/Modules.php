@@ -10,20 +10,22 @@
 use Buepro\Easyconf\Controller\ConfigurationController;
 
 $hideNavigation = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['hidePageNavigation'] ?? false;
-
 return [
     'web_Easyconf' => [
         'parent' => 'site',
-        'position' => ['before' => 'site_configuration'],
         'access' => 'user',
-        'workspaces' => 'live',
         'iconIdentifier' => 'easyconf-extension',
-        'path' => '/module/web/easyconf',
+
         'labels' => 'LLL:EXT:easyconf/Resources/Private/Language/locallang_module.xlf',
+        'path' => '/module/web/easyconf',
         'extensionName' => 'Easyconf',
         'controllerActions' => [
             ConfigurationController::class => ['edit', 'info'],
         ],
+
+
+        'position' => ['before' => 'site_configuration'],
+        'workspaces' => 'live',
         'navigationComponent' => $hideNavigation ? '' : '@typo3/backend/page-tree/page-tree-element',
     ],
 ];

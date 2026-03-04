@@ -16,6 +16,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CreatePageButtonElement extends AbstractFormElement
 {
+    public function __construct(private readonly \TYPO3\CMS\Core\Site\SiteFinder $siteFinder) {}
+
     public function render(): array
     {
         $result = $this->initializeResultArray();
@@ -92,7 +94,7 @@ JS;
         if ($convertValue) {
             if (str_starts_with($value, 'site-settings:')) {
                 $targetPidFromSetting = substr($value, strlen('site-settings:'));
-                return GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getSettings()->getAllFlat()[$targetPidFromSetting] ?? false;
+                return $this->siteFinder->getSiteByPageId($this->data['effectivePid'])->getSettings()->getAllFlat()[$targetPidFromSetting] ?? false;
             } elseif (str_starts_with($value, 'site-configuration:')) {
                 $targetPidFromConfiguration = substr($value, strlen('site-configuration:'));
                 try {

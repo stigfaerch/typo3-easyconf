@@ -11,14 +11,14 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Domain\Repository;
 
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
-class ConfigurationRepository
+readonly class ConfigurationRepository
 {
+    public function __construct(private \TYPO3\CMS\Core\Database\ConnectionPool $connectionPool)
+    {
+    }
     public function getFirstByPid(int $pid): ?array
     {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+        $queryBuilder = $this->connectionPool
             ->getConnectionForTable('tx_easyconf_configuration')
             ->createQueryBuilder();
         $result = $queryBuilder

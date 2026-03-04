@@ -15,6 +15,7 @@ use Buepro\Easyconf\Domain\Repository\ConfigurationRepository;
 use Buepro\Easyconf\Service\DatabaseService;
 use Buepro\Easyconf\Service\UriService;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
@@ -27,6 +28,7 @@ use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
+#[AsController]
 class ConfigurationController extends ActionController
 {
     protected ?int $pageUid;
@@ -43,8 +45,8 @@ class ConfigurationController extends ActionController
         protected readonly PageRepository $pageRepository,
         protected readonly DatabaseService $databaseService,
         protected readonly PageRenderer $pageRenderer,
-    ) {
-    }
+        private readonly \TYPO3\CMS\Core\Site\SiteFinder $siteFinder,
+    ) {}
 
     public function initializeAction(): void
     {
@@ -125,8 +127,10 @@ class ConfigurationController extends ActionController
                     if ($type['pageUidFromSiteSetting'] ?? false) {
                         try {
                             $pid = ArrayUtility::getValueByPath($site->getSettings()->getAll(), $type['pageUidFromSiteSetting'], '.');
-                            if(filter_var($pid, FILTER_VALIDATE_INT) !== false && is_string($pid)) {
-                                $pid = (int)$pid;
+                            if(filter_var($pid, FILTER_VALIDATE_INT) !== false) {
+                                if(is_string($pid)) {
+                                    $pid = (int)$pid;
+                                }
                             } else {
                                 throw new Exception('Invalid page UID: ' . $pid);
                             }
@@ -146,7 +150,7 @@ class ConfigurationController extends ActionController
                     'rootPageUid' => $site->getRootPageId(),
                 ];
             },
-            GeneralUtility::makeInstance(SiteFinder::class)->getAllSites()
+            $this->siteFinder->getAllSites()
         );
         return array_filter($sites, static fn (array $site): bool => $site !== []);
     }

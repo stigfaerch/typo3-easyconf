@@ -45,14 +45,16 @@ class TypoScriptService implements SingletonInterface, MapperServiceInterface, L
 
     public function __construct(
         private readonly SysTemplateRepository $sysTemplateRepository,
-        private readonly SysTemplateTreeBuilder $treeBuilder
+        private readonly SysTemplateTreeBuilder $treeBuilder,
+        private readonly \TYPO3\CMS\Core\Site\SiteFinder $siteFinder,
+        private readonly \TYPO3\CMS\Core\Database\ConnectionPool $connectionPool
     ) {
     }
 
     public function init(int $pageUid): self
     {
         $this->pageUid = $pageUid;
-        $this->site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pageUid);
+        $this->site = $this->siteFinder->getSiteByPageId($pageUid);
         $rootLine = GeneralUtility::makeInstance(RootlineUtility::class, $pageUid)->get();
         $this->initializeActivePageProperties($rootLine);
         $this->initializeInheritedConstants($rootLine);
@@ -104,7 +106,7 @@ class TypoScriptService implements SingletonInterface, MapperServiceInterface, L
 
     protected function updateTemplateConstants(string $constants): void
     {
-        GeneralUtility::makeInstance(ConnectionPool::class)
+        $this->connectionPool
             ->getConnectionForTable('sys_template')
             ->update(
                 'sys_template',

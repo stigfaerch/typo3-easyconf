@@ -13,7 +13,6 @@ namespace Buepro\Easyconf\Mapper\Service;
 
 use Buepro\Easyconf\Service\DatabaseService;
 use TYPO3\CMS\Core\Database\Connection;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -22,6 +21,7 @@ class EasyconfService implements SingletonInterface, MapperServiceInterface
 {
     protected array $configuration = [];
     protected array $fields = [];
+    public function __construct(private readonly \TYPO3\CMS\Core\Database\ConnectionPool $connectionPool) {}
 
     public function init(int $pageUid): self
     {
@@ -60,7 +60,7 @@ class EasyconfService implements SingletonInterface, MapperServiceInterface
 
     public function persistFields(): self
     {
-        GeneralUtility::makeInstance(ConnectionPool::class)
+        $this->connectionPool
             ->getConnectionForTable('tx_easyconf_configuration')
             ->update(
                 'tx_easyconf_configuration',

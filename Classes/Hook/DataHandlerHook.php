@@ -20,7 +20,6 @@ use Buepro\Easyconf\Service\DatabaseService;
 use Buepro\Easyconf\TypoScript\ConstantSubstitutor;
 use Buepro\Easyconf\Utility\TcaUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -39,14 +38,9 @@ class DataHandlerHook implements SingletonInterface
 
     protected EventDispatcherInterface $eventDispatcher;
     protected ConstantSubstitutor $constantSubstitutor;
-
-    public function injectEventDispatcher(EventDispatcherInterface $eventDispatcher): void
+    public function __construct(private readonly \TYPO3\CMS\Core\Database\ConnectionPool $connectionPool, \Psr\EventDispatcher\EventDispatcherInterface $eventDispatcher, \Buepro\Easyconf\TypoScript\ConstantSubstitutor $constantSubstitutor)
     {
         $this->eventDispatcher = $eventDispatcher;
-    }
-
-    public function injectConstantSubstitutor(ConstantSubstitutor $constantSubstitutor): void
-    {
         $this->constantSubstitutor = $constantSubstitutor;
     }
 
@@ -75,7 +69,7 @@ class DataHandlerHook implements SingletonInterface
     {
         if (
             self::$configurationData !== null &&
-            is_array($configurationRecord = GeneralUtility::makeInstance(ConnectionPool::class)
+            is_array($configurationRecord = $this->connectionPool
                 ->getConnectionForTable('tx_easyconf_configuration')
                 ->select(['*'], 'tx_easyconf_configuration', ['uid' => self::$configurationData['tableUid']])
                 ->fetchAssociative())

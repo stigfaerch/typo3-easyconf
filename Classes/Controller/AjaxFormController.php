@@ -23,6 +23,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class AjaxFormController
 {
 
+    public function __construct(private readonly \TYPO3\CMS\Core\Site\SiteFinder $siteFinder)
+    {
+    }
     public function createPage(ServerRequestInterface $request): ResponseInterface
     {
         $parsedBody = (array)$request->getParsedBody();
@@ -36,8 +39,9 @@ final class AjaxFormController
         $newPidSettingPath = $parsedBody['newPidSettingPath'];
 
         if ($copySourcePid = $parsedBody['copySourcePid'] ?? false) {
-            if ((bool)$newPageUid = $this->createNewPageFromCopy($copySourcePid, $targetPid, $newPageTitle)) {
-                $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($newPageUid);
+            $newPageUid = $this->createNewPageFromCopy($copySourcePid, $targetPid, $newPageTitle);
+            if ($newPageTitle > 0) {
+                $site = $this->siteFinder->getSiteByPageId($newPageUid);
 
                 list($configTarget, $path) = GeneralUtility::trimExplode(':', $newPidSettingPath);
 
@@ -47,7 +51,7 @@ final class AjaxFormController
                 } elseif ($configTarget === 'site-configuration') {
                     $siteDataService = GeneralUtility::makeInstance(SiteConfigurationService::class);
                 } else {
-                    throw new Exception('newPidSettingPath has wrong first value. Should either be site-settings org site-configuration');
+                    throw new Exception('newPidSettingPath has wrong first value. Should either be site-settings org site-configuration', 1772638633);
                 }
                 $siteDataService->init($site->getRootPageId())->addAndSaveValue($path, $newPageUid);
             }
@@ -80,6 +84,7 @@ final class AjaxFormController
         $dataHandler->process_datamap();
         $dataHandler->process_cmdmap();
 
+        $newPageUid = false;
         if (count($dataHandler->errorLog) > 0) {
             $copyMapping = $dataHandler->copyMappingArray_merged['pages'];
             $newPageUid = $copyMapping[$sourcePid] ?? null;
