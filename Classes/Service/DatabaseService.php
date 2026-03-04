@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Buepro\Easyconf\Service;
 
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class DatabaseService
@@ -26,9 +27,9 @@ class DatabaseService
                 $constraint
             )->fetchOne();
         if (is_string($result) || is_int($result) || is_float($result)) {
-            return $result;
+            return (string)$result;
         }
-        return false;
+        throw new Exception('Field "' . $field . '" does not exist in database table "' . $table . '"', 1772525931);
     }
 
     public function getRecord(string $table, array $constraint): ?array
@@ -43,7 +44,7 @@ class DatabaseService
         return is_array($result) && $result !== [] ? $result : null;
     }
 
-    public function addRecord(string $table, array $fields, array $types = []): ?array
+    public function addRecord(string $table, array $fields, array $types = []): array
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
         $now = time();
@@ -57,6 +58,12 @@ class DatabaseService
             $fields,
             $types
         );
-        return $this->getRecord($table, ['uid' => (int)$connection->lastInsertId()]);
+
+        $record = $this->getRecord($table, ['uid' => (int)$connection->lastInsertId()]);
+        if(is_array($record) && $record !== []) {
+            return $record;
+        } else {
+            throw new Exception('Failed to retrieve newly created record', 1772525795);
+        }
     }
 }

@@ -1,16 +1,22 @@
 <?php
 
+/*
+ * This file is part of the composer package buepro/typo3-easyconf.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Buepro\Easyconf\Service;
 
 use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
 
-class Mapping
+final class Mapping
 {
     protected string $mapper;
     protected string $path;
     protected string $fieldPrefix = '';
     protected array $properties = [];
-
 
     protected string $configurationString = '';
 
@@ -40,7 +46,6 @@ class Mapping
     {
         return $this->mapper;
     }
-
 
     public function getPath(): string
     {

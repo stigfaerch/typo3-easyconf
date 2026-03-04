@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+/*
+ * This file is part of the composer package buepro/typo3-easyconf.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Buepro\Easyconf\Controller;
 
 use Buepro\Easyconf\Mapper\Service\SiteConfigurationService;
@@ -18,17 +25,18 @@ final class AjaxFormController
 
     public function createPage(ServerRequestInterface $request): ResponseInterface
     {
-        $targetPid = $request->getParsedBody()['targetPid']
+        $parsedBody = (array)$request->getParsedBody();
+        $targetPid = $parsedBody['targetPid']
             ?? throw new \InvalidArgumentException(
                 'Please provide a number for targetPid.',
                 1580585107,
             );
-        $newPageTitle = $request->getParsedBody()['newPageTitle'];
+        $newPageTitle = $parsedBody['newPageTitle'];
 
-        $newPidSettingPath = $request->getParsedBody()['newPidSettingPath'];
+        $newPidSettingPath = $parsedBody['newPidSettingPath'];
 
-        if($copySourcePid = $request->getParsedBody()['copySourcePid'] ?? false) {
-            if($newPageUid = $this->createNewPageFromCopy($copySourcePid, $targetPid, $newPageTitle)) {
+        if ($copySourcePid = $parsedBody['copySourcePid'] ?? false) {
+            if ((bool)$newPageUid = $this->createNewPageFromCopy($copySourcePid, $targetPid, $newPageTitle)) {
                 $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($newPageUid);
 
                 list($configTarget, $path) = GeneralUtility::trimExplode(':', $newPidSettingPath);
@@ -43,8 +51,7 @@ final class AjaxFormController
                 }
                 $siteDataService->init($site->getRootPageId())->addAndSaveValue($path, $newPageUid);
             }
-        };
-
+        }
 
         $responseFactory = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(ResponseFactoryInterface::class);
         $response = $responseFactory->createResponse()
@@ -55,9 +62,9 @@ final class AjaxFormController
         return $response;
     }
 
-    private function createNewPageFromCopy($sourcePid, $targetPid, $newTitle = null): int
+    private function createNewPageFromCopy(int $sourcePid, int $targetPid, string $newTitle = null): int
     {
-        $adminBeUser = \Buepro\Easyconf\Utility\GeneralUtility::initAdmin($GLOBALS['BE_USER']->user['uid']);
+        $adminBeUser = \Buepro\Easyconf\Utility\GeneralUtility::initAdmin((int)$GLOBALS['BE_USER']->user['uid']);
         $data = [];
         $cmd = [
             'pages' => [
@@ -73,11 +80,13 @@ final class AjaxFormController
         $dataHandler->process_datamap();
         $dataHandler->process_cmdmap();
 
-        if (empty($dataHandler->errorLog)) {
+        if (count($dataHandler->errorLog) > 0) {
             $copyMapping = $dataHandler->copyMappingArray_merged['pages'];
             $newPageUid = $copyMapping[$sourcePid] ?? null;
 
-            if($newTitle) $data['pages'][$newPageUid]['title'] = $newTitle;
+            if ($newTitle !== null && $newTitle !== '') {
+                $data['pages'][$newPageUid]['title'] = $newTitle;
+            }
             $data['pages'][$newPageUid]['doktype'] = 254;
             $dataHandler->start($data, []);
             $dataHandler->process_datamap();
@@ -87,11 +96,13 @@ final class AjaxFormController
         $GLOBALS['BE_USER']->uc['easyconf_pagetree_refresh'] = true;
         $GLOBALS['BE_USER']->writeUC();
 
-        if($newPageUid ?? false) return $newPageUid;
+        if ($newPageUid ?? false) {
+            return $newPageUid;
+        }
         return 0;
     }
 
-    private function getDataHandler()
+    private function getDataHandler(): DataHandler
     {
         return GeneralUtility::makeInstance(DataHandler::class);
     }

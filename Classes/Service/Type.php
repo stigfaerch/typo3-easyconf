@@ -1,5 +1,12 @@
 <?php
 
+/*
+ * This file is part of the composer package buepro/typo3-easyconf.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Buepro\Easyconf\Service;
 
 use Buepro\Easyconf\Utility\PropertyHelper;
@@ -27,7 +34,7 @@ class Type
         $this->l10nFile = $tcaBuilderService->getL10nFile();
     }
 
-    public function init(string $cardIcon = '', string $title = null, string $subtitle = null, string $description = null, string $requiredBackendUserGroup = null, $pageUidFromSiteSetting = null): static
+    public function init(string $cardIcon = '', string $title = null, string $subtitle = null, string $description = null, string $requiredBackendUserGroup = null, string $pageUidFromSiteSetting = null): static
     {
         $this->configuration =
             [
@@ -41,14 +48,16 @@ class Type
         return $this;
     }
 
-    function addPalette(string $id = null, int $lineBreakPeriod = 1, string $header = '', ?string $headerTag = null): Palette
+    public function addPalette(string $id = null, int $lineBreakPeriod = 1, string $header = '', ?string $headerTag = null): Palette
     {
         return new Palette($this, $id, $lineBreakPeriod, $header, $headerTag);
     }
 
-    function addTab(string $id = null, ?string $tabName = null): static
+    public function addTab(string $id = null, ?string $tabName = null): static
     {
-        if(is_null($id)) { $id = bin2hex(random_bytes(5));}
+        if (is_null($id)) {
+            $id = bin2hex(random_bytes(5));
+        }
         $this->properties[] = '--div--;' . ($tabName ?? $this->l10nFile . ':' . $id);
         return $this;
     }
@@ -71,7 +80,7 @@ class Type
         return $GLOBALS['TCA']['tx_easyconf_configuration']['types'][$this->type] ?? [];
     }
 
-    public function isClearCacheForSite(): bool
+    public function isClearCacheForSite(): ?bool
     {
         return $this->clearCacheForSite;
     }
@@ -88,7 +97,7 @@ class Type
         return $this;
     }
 
-    function map(Mapping ...$properties): static
+    public function map(Mapping ...$properties): static
     {
         foreach ($properties as $propertiesObject) {
             $this->properties[] = $this->build($propertiesObject);
@@ -96,9 +105,9 @@ class Type
         return $this;
     }
 
-    function addPaletteToProperties($id): void
+    public function addPaletteToProperties(string $id): void
     {
-        $this->properties[] = "--palette--;;" . $id;
+        $this->properties[] = '--palette--;;' . $id;
     }
 
     public function build(Mapping $mapping): string
@@ -108,11 +117,11 @@ class Type
         $newProperties = [];
         $modify = [];
         foreach ($mapping->getProperties() as $key => $value) {
-            if(is_int($key)) {
-                if(is_array($value)) {
+            if (is_int($key)) {
+                if (is_array($value)) {
                     $newPropertiesForPropertyMap[] = $newProperties[] = $value['property'] ?? $key;
                     $modify[] = $value;
-                } elseif($value = '--linebreak--') {
+                } elseif ($value === '--linebreak--') {
                     $newProperties[] = $value;
                 } else {
                     $newPropertiesForPropertyMap[] = $newProperties[] = $value;
@@ -122,7 +131,7 @@ class Type
                 $newProperties[] = $newPropertiesForPropertyMap[] = $key;
                 $value['config'] = $value['config'] ?? [];
                 $value['property'] = $key;
-                if($value['displayCond'] ?? false) {
+                if ($value['displayCond'] ?? false) {
                     $value['displayCond'] = $value['displayCond'];
                 }
                 PropertyHelper::addFieldInformationConfiguration($value['config']);

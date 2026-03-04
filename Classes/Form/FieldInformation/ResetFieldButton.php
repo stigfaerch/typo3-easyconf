@@ -1,20 +1,24 @@
 <?php
 
+/*
+ * This file is part of the composer package buepro/typo3-easyconf.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Buepro\Easyconf\Form\FieldInformation;
 
 use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
 use TYPO3\CMS\Backend\Form\AbstractNode;
-use TYPO3\CMS\Core\Imaging\IconFactory;
-use TYPO3\CMS\Core\LinkHandling\LinkService;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
-use TYPO3\CMS\Core\Resource\ResourceFactory;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ResetFieldButton extends AbstractNode
 {
 
     public function render(): array
     {
+        $result = [];
         /**
          * TODO
          * Add and include stylesheet
@@ -25,7 +29,7 @@ class ResetFieldButton extends AbstractNode
         $defaultValue = $fieldConfig['default'] ?? false;
         $currentValue = $this->data['parameterArray']['itemFormElValue'];
         $currentValue = is_array($currentValue) ? ($currentValue[0] ?? false) : $currentValue;
-        if (($fieldConfig['tx_easyconf']['mapper'] !== TypoScriptConstantMapper::class) OR (!$defaultValue && $currentValue == '')  OR ($defaultValue == $currentValue)) {
+        if (($fieldConfig['tx_easyconf']['mapper'] !== TypoScriptConstantMapper::class) or (!$defaultValue && $currentValue == '')  or ($defaultValue == $currentValue)) {
             return ['html' => ''];
         }
         $iconPath = \TYPO3\CMS\Core\Utility\PathUtility::getPublicResourceWebPath('EXT:core/Resources/Public/Icons/T3Icons/svgs/actions/actions-undo.svg');

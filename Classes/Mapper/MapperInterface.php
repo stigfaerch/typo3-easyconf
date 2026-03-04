@@ -29,4 +29,6 @@ interface MapperInterface
     public function removePropertyFromBuffer(string $path): self;
 
     public function persistBuffer(): self;
+
+    public function processFuncAfterBufferPersisted(int $pid): array;
 }

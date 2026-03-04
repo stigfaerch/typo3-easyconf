@@ -1,5 +1,12 @@
 <?php
 
+/*
+ * This file is part of the composer package buepro/typo3-easyconf.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Buepro\Easyconf\Form\Element;
 
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
@@ -14,18 +21,19 @@ class CreatePageButtonElement extends AbstractFormElement
         $result = $this->initializeResultArray();
         $label = $this->getValue('label');
         $newPageTitle = $this->getValue('newPageTitle');
-        $targetPid = $this->getValue('targetPid');
-        $copySourcePid = $this->getValue('copySourcePid');
-        $newPidSettingPath = $this->getValue('newPidSettingPath', false);
+        $targetPid = (string)$this->getValue('targetPid', 'int');
+        $copySourcePid = $this->getValue('copySourcePid', 'int');
+        $newPidSettingPath = $this->getValue('newPidSettingPath', 'string', false);
 
         $buttonId = 'btn-' . uniqid();
 
         $html = [];
         $html[] = '<div class="form-control-wrap">';
         $html[] = '<button type="button" id="' . $buttonId . '" class="btn btn-default">';
-        $html[] = htmlspecialchars($label);
+        $html[] = htmlspecialchars((string)$label);
         $html[] = '</button>';
         $html[] = '</div>';
+
 
         $script = <<<JS
 // Must be a module so import works
@@ -78,22 +86,26 @@ JS;
         return $result;
     }
 
-    private function getValue($value, $convertValue = true)
+    private function getValue(int|string $key, string $type = 'string', bool $convertValue = true): string|int
     {
-        $value = $this->data['parameterArray']['fieldConf']['config'][$value] ?? '';
-        if($convertValue) {
-            if(str_starts_with($value, 'site-settings:')) {
+        $value = $this->data['parameterArray']['fieldConf']['config'][$key] ?? '';
+        if ($convertValue) {
+            if (str_starts_with($value, 'site-settings:')) {
                 $targetPidFromSetting = substr($value, strlen('site-settings:'));
                 return GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getSettings()->getAllFlat()[$targetPidFromSetting] ?? false;
             } elseif (str_starts_with($value, 'site-configuration:')) {
                 $targetPidFromConfiguration = substr($value, strlen('site-configuration:'));
                 try {
-                    return \TYPO3\CMS\Core\Utility\ArrayUtility::getValueByPath(GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getConfiguration(), $targetPidFromConfiguration, '.');
+                    $value = \TYPO3\CMS\Core\Utility\ArrayUtility::getValueByPath(GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($this->data['effectivePid'])->getConfiguration(), $targetPidFromConfiguration, '.');
                 } catch (MissingArrayPathException $e) {
-                    return null;
+                    return '';
                 }
             }
         }
-        return $value;
+        return match ($type) {
+            'string' => !is_array($value) ? $value : '',
+            'int' => is_numeric($value) ? $value : '',
+            default => '',
+        };
     }
 }

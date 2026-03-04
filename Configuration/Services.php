@@ -1,8 +1,14 @@
 <?php
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+/*
+ * This file is part of the composer package buepro/typo3-easyconf.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use TYPO3\CMS\Backend\Controller\Event\ModifyPageLayoutContentEvent;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -20,10 +26,10 @@ return function (ContainerConfigurator $container, ContainerBuilder $containerBu
     $services
         ->load('Buepro\\Easyconf\\', '../Classes/*');
 
-    // Specific configuration for Buepro\Easyconf\Configuration\SiteConfiguration
-    $serviceConfigurator = $services
-        ->get(Buepro\Easyconf\Configuration\SiteConfiguration::class);
-    $serviceConfigurator->arg('$configPath', '%env(TYPO3:configPath)%/sites');
+//    // Specific configuration for Buepro\Easyconf\Configuration\SiteConfiguration
+//    $serviceConfigurator = $services
+//        ->get(Buepro\Easyconf\Configuration\SiteConfiguration::class);
+//    $serviceConfigurator->arg('$configPath', '%env(TYPO3:configPath)%/sites');
 
     $containerBuilder->registerForAutoconfiguration(\Buepro\Easyconf\EventListener\ExcludeFromIndexing::class)
         ->addTag('event.listener', [
@@ -35,8 +41,4 @@ return function (ContainerConfigurator $container, ContainerBuilder $containerBu
             'identifier' => 'buepro/easyconf/refresh-page-tree',
             'event' => 'TYPO3\CMS\Backend\Controller\Event\ModifyPageLayoutContentEvent'
         ]);
-
-    if((GeneralUtility::makeInstance(Typo3Version::class))->getMajorVersion() == 12) {
-        $serviceConfigurator->arg('$coreCache', new \Symfony\Component\DependencyInjection\Reference('cache.core'));
-    }
 };

@@ -11,9 +11,9 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Mapper\Service;
 
-use Buepro\Easyconf\Configuration\SiteConfiguration;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use TYPO3\CMS\Core\Configuration\SiteConfiguration;
 use TYPO3\CMS\Core\Configuration\SiteWriter;
-use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -25,20 +25,22 @@ abstract class AbstractSiteConfigurationService implements SingletonInterface, M
     abstract public function load(): array;
     abstract public function write(array $siteData): void;
 
-    /** @var SiteConfiguration|null  */
-    protected ?SiteConfiguration $siteConfiguration = null;
-    // @phpstan-ignore class.notFound
-    protected ?SiteWriter $siteWriter = null;
     protected ?Site $site = null;
     protected array $siteData = [];
+    protected string $configFileName = 'config.yaml';
+
+
+    public function __construct(
+        #[Autowire('%env(TYPO3:configPath)%/sites')]
+        protected string $configPath,
+        readonly protected SiteConfiguration $siteConfiguration,
+        readonly protected SiteWriter $siteWriter
+    ) {}
 
     public function init(int $pageUid): self
     {
-        $this->siteConfiguration = GeneralUtility::makeInstance(SiteConfiguration::class);
-        if((new Typo3Version())->getMajorVersion() >= 13) {
-            // @phpstan-ignore class.notFound
-            $this->siteWriter = GeneralUtility::makeInstance(SiteWriter::class);
-        }
+//        $this->siteConfiguration = GeneralUtility::makeInstance(SiteConfiguration::class);
+//        $this->siteWriter = GeneralUtility::makeInstance(SiteWriter::class);
         $sites = $this->siteConfiguration->getAllExistingSites();
         $indexedSites = [];
         foreach ($sites as $site) {
@@ -49,7 +51,7 @@ abstract class AbstractSiteConfigurationService implements SingletonInterface, M
         foreach ($rootLine as $pageRecord) {
             if (isset($indexedSites[$pageRecord['uid']])) {
                 $this->site = $indexedSites[$pageRecord['uid']];
-                $this->siteData = $this->load($this->site->getIdentifier());
+                $this->siteData = $this->load();
                 return $this;
             }
         }
@@ -93,15 +95,15 @@ abstract class AbstractSiteConfigurationService implements SingletonInterface, M
      */
     public function writeSiteData(array $siteData): void
     {
-        if ($this->siteConfiguration !== null && $this->getSite() !== null) {
+        if ($this->getSite() !== null) {
             $this->write($siteData);
             $this->siteData = $this->load();
         }
     }
 
-    public function addAndSaveValue($path, $value, $delimiter = '.'): void
+    public function addAndSaveValue(string $path, mixed $value, string $delimiter = '.'): void
     {
-        if ($this->siteConfiguration !== null && $this->getSite() !== null) {
+        if ($this->getSite() !== null) {
             $data = ArrayUtility::setValueByPath($this->siteData, $path, $value, $delimiter);
             $this->write($data);
         }

@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Utility;
 
-use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -92,7 +91,7 @@ class TcaUtility
     ): array {
         $properties = GeneralUtility::trimExplode(',', $propertyList);
         $fields = self::getFields($properties, $fieldPrefix, $fieldList);
-        $fieldLabelMap = $modify ? array_combine($fields, $modify) : [];
+        $fieldLabelMap = $modify !== [] ? array_combine($fields, $modify) : [];
         return [
             'mapper' => $mapper,
             'path' => $path,
@@ -117,7 +116,7 @@ class TcaUtility
                         'type' => 'input',
                     ],
                 ];
-                if($propertyMap['fieldModifyMap'][$field] ?? false) {
+                if ($propertyMap['fieldModifyMap'][$field] ?? false) {
                     $result[$field] = array_replace_recursive($result[$field], $propertyMap['fieldModifyMap'][$field]);
                 }
             }
@@ -136,7 +135,7 @@ class TcaUtility
             $propertiesWithLineBreaks = [];
             $index = 0;
             foreach ($properties as $value) {
-                if($value == '--linebreak--') {
+                if ($value == '--linebreak--') {
                     $index = -1;
                 }
                 if ($index > 0 && $index % $lineBreakPeriod === 0) {
@@ -150,7 +149,7 @@ class TcaUtility
         return ['showitem' => self::getFieldList($propertyList, $fieldPrefix, $fieldList)];
     }
 
-    public static function getType(array $tabs, string $l10nFile, string $type = '0', $cardIcon = ''): array
+    public static function getType(array $tabs, string $l10nFile, string $type = '0', string $cardIcon = ''): array
     {
         $localizedTabs = [];
         foreach ($tabs as $tabName => $tabItemList) {

@@ -16,7 +16,7 @@ use Buepro\Easyconf\Utility\TcaUtility;
 defined('TYPO3') or die('Access denied.');
 
 (static function () {
-    if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['loadDemoConfiguration'] ?? false) {
+    if (\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['loadDemoConfiguration'] ?? false) {
         $l10nFile = 'LLL:EXT:easyconf/Resources/Private/Language/locallang_db.xlf';
         $tca = &$GLOBALS['TCA']['tx_easyconf_configuration'];
         $tca['ctrl']['type'] = 'group';
@@ -80,12 +80,12 @@ defined('TYPO3') or die('Access denied.');
         ];
         TcaUtility::addType('0', $tabs, $l10nFile, 'icon:module-list');
 
-        TcaUtility::addType('1',
+        TcaUtility::addType(
+            '1',
             ['tabSiteSettings' => TcaUtility::getFieldList('newsletter.popup, heroImage, slider, specialOffer', 'settings')],
             $l10nFile,
-            'EXT:easyconf/Resources/Public/Icons/CardToggle.svg');
-
-
+            'EXT:easyconf/Resources/Public/Icons/CardToggle.svg'
+        );
 
         /**
          * Modify columns

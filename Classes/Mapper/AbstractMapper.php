@@ -18,8 +18,7 @@ abstract class AbstractMapper implements MapperInterface
 {
     protected array $buffer = [];
 
-    private ?PropertyFieldMap $propertyFieldMap = null;
-
+    private PropertyFieldMap $propertyFieldMap;
 
     public function __construct()
     {
@@ -48,16 +47,21 @@ abstract class AbstractMapper implements MapperInterface
         return $this;
     }
 
-    public function processFuncAfterBufferPersisted($pid): array
+    public function processFuncAfterBufferPersisted(int $pid): array
     {
         $buffers = is_array(reset($this->buffer)) ? $this->buffer : [$this->buffer];
         foreach ($buffers as $buffer) {
             foreach ($buffer as $path => $value) {
-                if($config = $this->getPropertyFieldMap()->getConfigurationFromPropertyPath($path)) {
-                    if($config['postProcess'] ?? false) {
+                $config = $this->getPropertyFieldMap()->getConfigurationFromPropertyPath($path);
+                if ($config !== []) {
+                    if ($config['postProcess'] ?? false) {
                         $postProcess = (is_array(reset($config['postProcess']))) ? $config['postProcess'] : [$config['postProcess']];
-                        foreach ($postProcess ?? [] as $arguments) {
-                            GeneralUtility::makeInstance(array_shift($arguments), $config, $this, $pid);
+                        foreach ($postProcess as $arguments) {
+                            $className = array_shift($arguments);
+                            if (is_string($className) && class_exists($className)) {
+                                /** @var class-string<object> $className */
+                                GeneralUtility::makeInstance($className, $config, $this, $pid);
+                            }
                         }
                     }
                 }

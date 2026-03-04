@@ -1,5 +1,12 @@
 <?php
 
+/*
+ * This file is part of the composer package buepro/typo3-easyconf.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Buepro\Easyconf\Form\Element;
 
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
@@ -12,7 +19,7 @@ class StaticTextElement extends AbstractFormElement
      */
     public function render(): array
     {
-        $resultArray['html'] = '';
+        $resultArray = ['html' => ''];
         $parameterArray = $this->data['parameterArray'] ?? [];
         $width = $parameterArray['fieldConf']['width'] ?? 100;
         // Ensure the width is within the range of 0 to 100
@@ -22,15 +29,15 @@ class StaticTextElement extends AbstractFormElement
         $cols = round(($width / 100) * 12);
         $config = $parameterArray['fieldConf'];
         $headerAttributes = '';
-        if($config['headerAttributes'] ?? false) {
+        if ($config['headerAttributes'] ?? false) {
             foreach ($config['headerAttributes'] as $key => $value) {
                 $headerAttributes .= ' ' . $key . '="' . $value . '"';
             }
         }
-        if($header = $config['helpHeader'] ?? false) {
+        if ($header = $config['helpHeader'] ?? false) {
             $resultArray['html'] .= "<{$config['headerTag']} $headerAttributes>{$header}</{$config['headerTag']}>";
         }
-        if($text = $parameterArray['fieldConf']['helpText'] ?? false) {
+        if ($text = $parameterArray['fieldConf']['helpText'] ?? false) {
             $resultArray['html'] .= "<div class='col-md-{$cols}'>{$text}</div>";
         }
         $resultArray['labelHasBeenHandled'] = true;

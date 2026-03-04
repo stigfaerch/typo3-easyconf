@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Mapper;
 
+use Buepro\Easyconf\Mapper\Service\AbstractSiteConfigurationService;
 use Buepro\Easyconf\Mapper\Service\EasyconfService;
 use Buepro\Easyconf\Mapper\Service\RecordService;
 use Buepro\Easyconf\Mapper\Service\SiteConfigurationService;
@@ -22,8 +23,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class ServiceManager implements SingletonInterface
 {
     protected ?TypoScriptService $typoScriptService;
-    protected ?SiteConfigurationService $siteConfigurationService;
-    protected ?SiteSettingsService $siteSettingsService;
+    protected ?AbstractSiteConfigurationService $siteConfigurationService;
+    protected ?AbstractSiteConfigurationService $siteSettingsService;
     protected ?EasyconfService $easyconfService;
     protected ?RecordService $recordService;
 
@@ -59,12 +60,12 @@ class ServiceManager implements SingletonInterface
         return $this->recordService;
     }
 
-    public function getSiteConfigurationService(): ?SiteConfigurationService
+    public function getSiteConfigurationService(): ?AbstractSiteConfigurationService
     {
         return $this->siteConfigurationService;
     }
 
-    public function getSiteSettingsService(): ?SiteSettingsService
+    public function getSiteSettingsService(): ?AbstractSiteConfigurationService
     {
         return $this->siteSettingsService;
     }

@@ -7,7 +7,6 @@
  * LICENSE file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 defined('TYPO3') || die('Access denied.');
@@ -66,13 +65,13 @@ defined('TYPO3') || die('Access denied.');
         'class' => \Buepro\Easyconf\Form\Element\CreatePageButtonElement::class,
     ];
 
-    if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['enablePaletteStylingOverrideFeature'] ?? 0) {
+    if (\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['enablePaletteStylingOverrideFeature'] ?? 0) {
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Backend\Form\Container\PaletteAndSingleContainer::class] = [
             'className' => \Buepro\Easyconf\Form\Container\PaletteAndSingleContainer::class,
         ];
     }
 
-    if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['addAndUseSiteIdentifierPageCacheTag'] ?? false) {
+    if (\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['addAndUseSiteIdentifierPageCacheTag'] ?? false) {
         ExtensionManagementUtility::addTypoScriptSetup('
         page {
             # add custom page cache tags
@@ -81,6 +80,6 @@ defined('TYPO3') || die('Access denied.');
             1737974780.addPageCacheTags.wrap = siteIdentifier_|
         }
         ');
-    };
+    }
 
 })();

@@ -50,15 +50,21 @@ class FormDataProvider implements FormDataProviderInterface, SingletonInterface
                 ->loadJavaScriptModule('@buepro/easyconf/FormDataProvider.js');
             // Read in properties
             foreach ($columns as $columnName => $columnConfig) {
+                $path = TcaUtility::getMappingPath($columnName);
+                $class = TcaUtility::getMappingClass($columnName);
                 if (
-                    ($path = TcaUtility::getMappingPath($columnName)) !== null &&
-                    ($class = TcaUtility::getMappingClass($columnName)) !== null &&
-                    ($mapper = GeneralUtility::makeInstance($class)) instanceof MapperInterface
+                    $path !== null &&
+                    is_string($class) &&
+                    class_exists($class)
                 ) {
-                    /** @var EasyconfMapper|SiteSettingsMapper|TypoScriptConstantMapper $mapper */
-                    $value = $mapper->getProperty($path);
-                    if($columnName != 'group') {
-                        $result['databaseRow'][$columnName] = TcaUtility::mapMapperToFormValue($columnName, $value);
+                    /** @var class-string<object> $class */
+                    $mapperInstance = GeneralUtility::makeInstance($class);
+                    if ($mapperInstance instanceof MapperInterface) {
+                        /** @var EasyconfMapper|SiteSettingsMapper|TypoScriptConstantMapper $mapperInstance */
+                        $value = $mapperInstance->getProperty($path);
+                        if ($columnName != 'group') {
+                            $result['databaseRow'][$columnName] = TcaUtility::mapMapperToFormValue($columnName, $value);
+                        }
                     }
                 }
             }
@@ -66,8 +72,8 @@ class FormDataProvider implements FormDataProviderInterface, SingletonInterface
             // @phpstan-ignore-next-line
             $result['databaseRow'] = $this->eventDispatcher->dispatch($event)->getFormFields();
         }
-        if($result['databaseRow']['group'] ?? false) {
-            $result['recordTypeValue'] = $result['databaseRow']['group'] ?: 0;
+        if ($result['databaseRow']['group'] ?? false) {
+            $result['recordTypeValue'] = $result['databaseRow']['group'] !== '' ? $result['databaseRow']['group'] : 0;
         }
         return $result;
     }

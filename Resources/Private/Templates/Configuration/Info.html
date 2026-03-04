@@ -33,9 +33,6 @@
 </f:section>
 
 <f:section name="options">
-    <f:be.security.ifHasRole role="">
-        <h1>nyhedsbrev aktiveret</h1>
-    </f:be.security.ifHasRole>
     <f:for each="{sites}" as="site">
         <f:if condition="{types -> f:count()} > 1">
             <f:then>
@@ -46,10 +43,12 @@
                             <f:then>
                                 <f:be.security.ifHasRole role="{typeData.requiredBackendUserGroup}">
                                     <f:then>
+                                        <h1>normal {typeData.requiredBackendUserGroup}</h1>
                                         <f:render section="card" arguments="{_all}" />
                                     </f:then>
                                     <f:else>
                                         <f:if condition="{isAdmin}">
+                                        <h1>admin</h1>
                                             <f:render section="card" arguments="{_all}" />
                                         </f:if>
                                     </f:else>

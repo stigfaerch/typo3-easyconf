@@ -1,21 +1,21 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#1 \\$className of static method TYPO3\\\\CMS\\\\Core\\\\Utility\\\\GeneralUtility\\:\\:makeInstance\\(\\) expects class\\-string\\<object\\>, string given\\.$#"
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
-			path: ../Classes/DataProvider/FormDataProvider.php
+			path: ../Classes/Form/Container/PaletteAndSingleContainer.php
 
 		-
-			message: "#^Unable to resolve the template type T in call to method static method TYPO3\\\\CMS\\\\Core\\\\Utility\\\\GeneralUtility\\:\\:makeInstance\\(\\)$#"
+			message: "#^Cannot call method getRequestUri\\(\\) on mixed\\.$#"
 			count: 1
-			path: ../Classes/DataProvider/FormDataProvider.php
+			path: ../Classes/ViewHelpers/Link/EditRecordViewHelper.php
 
 		-
-			message: "#^Parameter \\#1 \\$className of static method TYPO3\\\\CMS\\\\Core\\\\Utility\\\\GeneralUtility\\:\\:makeInstance\\(\\) expects class\\-string\\<object\\>, string given\\.$#"
+			message: "#^Cannot cast mixed to string\\.$#"
 			count: 1
-			path: ../Classes/Hook/DataHandlerHook.php
+			path: ../Classes/ViewHelpers/Link/EditRecordViewHelper.php
 
 		-
-			message: "#^Unable to resolve the template type T in call to method static method TYPO3\\\\CMS\\\\Core\\\\Utility\\\\GeneralUtility\\:\\:makeInstance\\(\\)$#"
+			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
-			path: ../Classes/Hook/DataHandlerHook.php
+			path: ../Classes/ViewHelpers/Link/EditRecordViewHelper.php

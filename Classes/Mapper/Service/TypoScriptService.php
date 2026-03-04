@@ -26,7 +26,6 @@ use TYPO3\CMS\Core\TypoScript\IncludeTree\Traverser\ConditionVerdictAwareInclude
 use TYPO3\CMS\Core\TypoScript\IncludeTree\Visitor\IncludeTreeCommentAwareAstBuilderVisitor;
 use TYPO3\CMS\Core\TypoScript\IncludeTree\Visitor\IncludeTreeConditionEnforcerVisitor;
 use TYPO3\CMS\Core\TypoScript\Tokenizer\LosslessTokenizer;
-use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\RootlineUtility;
 use TYPO3\CMS\Tstemplate\Controller\ActiveTypoScriptController;

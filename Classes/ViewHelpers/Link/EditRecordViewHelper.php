@@ -3,16 +3,10 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
+ * This file is part of the composer package buepro/typo3-easyconf.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
+ * LICENSE file that was distributed with this source code.
  */
 
 namespace Buepro\Easyconf\ViewHelpers\Link;
@@ -25,6 +19,8 @@ use TYPO3\CMS\Fluid\Core\Rendering\RenderingContext;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 
 /**
+ * NOTE: Copy of \TYPO3\CMS\Backend\ViewHelpers\Link\EditRecordViewHelper with argument group added
+ *
  * Use this ViewHelper to provide edit links to records. The ViewHelper will
  * pass the uid and table to FormEngine.
  *
@@ -70,7 +66,6 @@ final class EditRecordViewHelper extends AbstractTagBasedViewHelper
     public function initializeArguments(): void
     {
         parent::initializeArguments();
-        $this->registerUniversalTagAttributes();
         $this->registerArgument('uid', 'int', 'uid of record to be edited', true);
         $this->registerArgument('table', 'string', 'target database table', true);
         $this->registerArgument('fields', 'string', 'Edit only these fields (comma separated list)');
@@ -87,13 +82,10 @@ final class EditRecordViewHelper extends AbstractTagBasedViewHelper
         if ($this->arguments['uid'] < 1) {
             throw new \InvalidArgumentException('Uid must be a positive integer, ' . $this->arguments['uid'] . ' given.', 1526127158);
         }
-        /** @var RenderingContext $renderingContext */
-        $renderingContext = $this->renderingContext;
-        $request = $renderingContext->getRequest();
         if (empty($this->arguments['returnUrl'])
-            && $request instanceof ServerRequestInterface
+            && $this->renderingContext->hasAttribute(ServerRequestInterface::class)
         ) {
-            // @todo: We may want to deprecate fetching returnUrl from request
+            $request = $this->renderingContext->getAttribute(ServerRequestInterface::class);
             $this->arguments['returnUrl'] = $request->getAttribute('normalizedParams')->getRequestUri();
         }
 
@@ -106,13 +98,13 @@ final class EditRecordViewHelper extends AbstractTagBasedViewHelper
                 $this->arguments['table'] => GeneralUtility::trimExplode(',', $this->arguments['fields'], true),
             ];
         }
-        if($this->arguments['group'] ?? false) {
+        if ($this->arguments['group'] ?? false) {
             $params['overrideVals']['tx_easyconf_configuration']['group'] = $this->arguments['group'];
         }
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $uri = (string)$uriBuilder->buildUriFromRoute('record_edit', $params);
         $this->tag->addAttribute('href', $uri);
-        $this->tag->setContent($this->renderChildren());
+        $this->tag->setContent((string)$this->renderChildren());
         $this->tag->forceClosingTag(true);
         return $this->tag->render();
     }

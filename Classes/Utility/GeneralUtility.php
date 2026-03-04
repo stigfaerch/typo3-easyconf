@@ -23,13 +23,16 @@ use TYPO3\CMS\Core\Utility\GeneralUtility as CoreGeneralUtility;
 
 class GeneralUtility
 {
-    public static function flushPagesCache($pageId) {
-        if(\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['addAndUseSiteIdentifierPageCacheTag'] ?? false) {
+    public static function flushPagesCache(int $pageId): void
+    {
+        $config = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf');
+        if (is_array($config) && ($config['addAndUseSiteIdentifierPageCacheTag'] ?? false)) {
             try {
                 $site = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pageId);
                 \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class)->getCache('typoscript')->flush();
                 \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroupByTag('pages', 'siteIdentifier_' . $site->getIdentifier());
-            } catch (SiteNotFoundException $e) {}
+            } catch (SiteNotFoundException $e) {
+            }
         } else {
             \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class)->flushCachesInGroup('pages');
         }
@@ -79,7 +82,8 @@ class GeneralUtility
         );
     }
 
-    public static function initAdmin($userIdToSet) {
+    public static function initAdmin(int $userIdToSet): BackendUserAuthentication
+    {
         $newBeUser = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(BackendUserAuthentication::class); // New backend user object
         $newBeUser->setBeUserByUid($userIdToSet);
         $newBeUser->fetchGroupData();
@@ -89,19 +93,19 @@ class GeneralUtility
         return $newBeUser;
     }
 
-    public static function getValue($currentPageId, $valueData)
+    public static function getValue(int $currentPageId, mixed $valueData): mixed
     {
         if (is_string($valueData)) {
             // When $valueData is a string but does not contain a semicolon
             if (!str_contains($valueData, ':')) {
                 return $valueData;
-            // When used in the PagesService class
+                // When used in the PagesService class
             } else {
                 $params = explode(':', $valueData);
                 $source = $params[0];
                 $key = $params[1];
             }
-        // When used with displayCond. For example DisplayConditionFunctions->doesPageNotExist:site-configuration:pids.secondary-menu
+            // When used with displayCond. For example DisplayConditionFunctions->doesPageNotExist:site-configuration:pids.secondary-menu
         } elseif (is_array($valueData)) {
             $source = $valueData['conditionParameters'][0];
             $key = $valueData['conditionParameters'][1];
@@ -116,7 +120,8 @@ class GeneralUtility
             case 'site-configuration':
                 try {
                     return ArrayUtility::getValueByPath($site->getConfiguration(), $key, '.');
-                } catch (MissingArrayPathException $exception) {}
+                } catch (MissingArrayPathException $exception) {
+                }
                 return null;
             default:
                 return throw new Exception(

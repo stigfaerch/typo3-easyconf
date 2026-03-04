@@ -11,20 +11,27 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Mapper\Service;
 
+use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
+use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 class SiteConfigurationService extends AbstractSiteConfigurationService
 {
 
     public function load(): array
     {
-        return $this->siteConfiguration->load_withImportsNotProcessed($this->getSite()->getIdentifier());
+        if ($this->getSite() !== null) {
+            $fileName = $this->configPath . '/' . $this->getSite()->getIdentifier() . '/' . $this->configFileName;
+            $loader = GeneralUtility::makeInstance(YamlFileLoader::class);
+            return $loader->load(GeneralUtility::fixWindowsFilePath($fileName), 0);
+        }
+        throw new Exception('Site configuration service requires a valid site to load configuration', 1772553122);
     }
 
-    public function write($siteData): void
+    public function write(array $siteData): void
     {
-        if($this->siteWriter !== null) {
+        if ($this->getSite() !== null) {
             $this->siteWriter->write($this->getSite()->getIdentifier(), $siteData);
-        } else {
-            $this->siteConfiguration->write_withNoProcessing($this->getSite()->getIdentifier(), $siteData);
         }
     }
 }

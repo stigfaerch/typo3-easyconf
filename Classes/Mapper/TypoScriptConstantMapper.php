@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Mapper;
 
-use Buepro\Easyconf\Data\PropertyFieldMap;
 use Buepro\Easyconf\Mapper\Service\TypoScriptService;
 use Buepro\Easyconf\Mapper\Utility\TypoScriptConstantMapperUtility;
 use Buepro\Easyconf\Service\FileService;
@@ -26,12 +25,12 @@ use TYPO3\CMS\Core\Utility\PathUtility;
 
 class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterface
 {
-    public const RELATIVE_STORAGE_TS_PATH = 'module.tx_easyconf.persistence.storageRelativeTypoScriptPath';
-    public const IMPORT_STATEMENT_HANDLING_TS_PATH = 'module.tx_easyconf.settings.typoScriptConstantMapper.importStatementHandling';
-    public const FILE_NAME = 'EasyconfConstantsP%dT%d.typoscript';
-    public const TEMPLATE_TOKEN = '# The following line has been added automatically by the extension easyconf';
-    public const PROPERTY_BUFFER_KEY = 'properties';
-    public const SCRIPT_BUFFER_KEY = 'scripts';
+    public const string RELATIVE_STORAGE_TS_PATH = 'module.tx_easyconf.persistence.storageRelativeTypoScriptPath';
+    public const string IMPORT_STATEMENT_HANDLING_TS_PATH = 'module.tx_easyconf.settings.typoScriptConstantMapper.importStatementHandling';
+    public const string FILE_NAME = 'EasyconfConstantsP%dT%d.typoscript';
+    public const string TEMPLATE_TOKEN = '# The following line has been added automatically by the extension easyconf';
+    public const string PROPERTY_BUFFER_KEY = 'properties';
+    public const string SCRIPT_BUFFER_KEY = 'scripts';
 
     protected array $buffer = [self::PROPERTY_BUFFER_KEY => [], self::SCRIPT_BUFFER_KEY => []];
     protected string $storage = 'fileadmin/easyconf/Configuration/TypoScript/';
@@ -59,10 +58,11 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
 
     protected function getFileContents(): array
     {
-        $lines = @file($this->getFileWithAbsolutePath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        $lines = @file($this->getFileWithAbsolutePath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $lines = is_array($lines) ? $lines : [];
         $content = [];
         foreach ($lines as $line) {
-            if(!str_starts_with($line, '#') && str_contains($line, '=')) {
+            if (!str_starts_with($line, '#') && str_contains($line, '=')) {
                 list($key, $value) = GeneralUtility::trimExplode('=', $line, false, 2);
                 $content[$key] = $value;
             }
@@ -136,8 +136,10 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
 
     protected function getStorage(): string
     {
-        if($this->typoScriptService->getSite() && GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('easyconf')['useSiteIdentifierAsStorageSubfolder'] ?? false) {
-            return $this->storage . $this->typoScriptService->getSite()->getIdentifier() . '/';
+        $config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('easyconf');
+        $site = $this->typoScriptService->getSite();
+        if ($site !== null && is_array($config) && ($config['useSiteIdentifierAsStorageSubfolder'] ?? false)) {
+            return $this->storage . $site->getIdentifier() . '/';
         } else {
             return $this->storage;
         }
@@ -161,7 +163,9 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
         ksort($this->buffer[self::PROPERTY_BUFFER_KEY]);
         $constants = array_merge($this->getFileContents(), $this->buffer[self::PROPERTY_BUFFER_KEY]);
         foreach ($constants as $path => $value) {
-            if($value !== '??' && $this->getInheritedProperty($path) !== $value) $content[] = sprintf('%s = %s', $path, $value);
+            if ($value !== '??' && $this->getInheritedProperty($path) !== $value) {
+                $content[] = sprintf('%s = %s', $path, $value);
+            }
         }
         foreach ($this->buffer[self::SCRIPT_BUFFER_KEY] as $value) {
             $content[] = $value;
@@ -171,6 +175,7 @@ class TypoScriptConstantMapper extends AbstractMapper implements SingletonInterf
 
     protected function addImportStatementToTemplateRecord(): void
     {
+        $recData = [];
         $fileName = $this->getFileWithRelativePath();
         if ($fileName === null) {
             return;

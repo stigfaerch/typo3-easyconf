@@ -20,12 +20,9 @@ use Buepro\Easyconf\Service\DatabaseService;
 use Buepro\Easyconf\TypoScript\ConstantSubstitutor;
 use Buepro\Easyconf\Utility\TcaUtility;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
@@ -92,12 +89,16 @@ class DataHandlerHook implements SingletonInterface
             self::$configurationData = null;
             foreach (MapperRegistry::getInstances() as $mapper) {
                 $mapper->persistBuffer();
-                $mapper->processFuncAfterBufferPersisted($configurationRecord['pid']);
+                if (is_numeric($configurationRecord['pid'])) {
+                    $mapper->processFuncAfterBufferPersisted((int)$configurationRecord['pid']);
+                }
             }
             if ((bool)GeneralUtility::makeInstance(TypoScriptConstantMapper::class)->getProperty(
                 'module.tx_easyconf.persistence.clearPageCache'
             )) {
-                \Buepro\Easyconf\Utility\GeneralUtility::flushPagesCache($configurationRecord['pid']);
+                if (is_numeric($configurationRecord['pid'])) {
+                    \Buepro\Easyconf\Utility\GeneralUtility::flushPagesCache((int)$configurationRecord['pid']);
+                }
             }
         }
     }
@@ -113,29 +114,34 @@ class DataHandlerHook implements SingletonInterface
             GeneralUtility::makeInstance(ServiceManager::class)->init($pageUid)
         ) {
             foreach ($columns as $columnName => $columnConfig) {
+                    $path = TcaUtility::getMappingPath($columnName);
+                    $class = TcaUtility::getMappingClass($columnName);
                 if (
-                    ($path = TcaUtility::getMappingPath($columnName)) !== null &&
-                    ($class = TcaUtility::getMappingClass($columnName)) !== null &&
-                    ($mapper = GeneralUtility::makeInstance($class)) instanceof MapperInterface
+                    $path !== null &&
+                    $class !== null && class_exists($class)
                 ) {
-                    // Buffer all properties visible in the form
-                    if (isset($data[$columnName])) {
-                        $mapper->bufferProperty(
-                            $path,
-                            TcaUtility::mapFormToMapperValue($columnName, $data[$columnName])
-                        );
-                        continue;
-                    }
-                    // Buffer as well all TS constant properties where the value differs from the inherited value.
-                    // Like this once set values are not overwritten when a field isn't visible.
-                    if (
-                        $mapper instanceof TypoScriptConstantMapper &&
-                        $mapper->getProperty($path) !== $mapper->getInheritedProperty($path)
-                    ) {
-                        $mapper->bufferProperty(
-                            $path,
-                            TcaUtility::mapFormToMapperValue($columnName, $mapper->getProperty($path))
-                        );
+                    $mapperInstance = GeneralUtility::makeInstance($class);
+                    if($mapperInstance instanceof MapperInterface) {
+
+                        // Buffer all properties visible in the form
+                        if (isset($data[$columnName])) {
+                            $mapperInstance->bufferProperty(
+                                $path,
+                                TcaUtility::mapFormToMapperValue($columnName, $data[$columnName])
+                            );
+                            continue;
+                        }
+                        // Buffer as well all TS constant properties where the value differs from the inherited value.
+                        // Like this once set values are not overwritten when a field isn't visible.
+                        if (
+                            $mapperInstance instanceof TypoScriptConstantMapper &&
+                            $mapperInstance->getProperty($path) !== $mapperInstance->getInheritedProperty($path)
+                        ) {
+                            $mapperInstance->bufferProperty(
+                                $path,
+                                TcaUtility::mapFormToMapperValue($columnName, $mapperInstance->getProperty($path))
+                            );
+                        }
                     }
                 }
             }

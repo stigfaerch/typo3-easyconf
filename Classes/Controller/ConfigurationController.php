@@ -18,6 +18,7 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -42,22 +43,27 @@ class ConfigurationController extends ActionController
         protected readonly PageRepository $pageRepository,
         protected readonly DatabaseService $databaseService,
         protected readonly PageRenderer $pageRenderer,
-    ) {}
+    ) {
+    }
 
     public function initializeAction(): void
     {
         parent::initializeAction();
-        if($moduleStylingFilepath = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['moduleStylingFilePath'] ?? false) {
+        $extensionConfig = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf');
+        $moduleStylingFilepath = is_array($extensionConfig) ? ($extensionConfig['moduleStylingFilePath'] ?? null) : null;
+        if (is_string($moduleStylingFilepath) && $moduleStylingFilepath !== '') {
             $this->pageRenderer->addCssFile($moduleStylingFilepath);
         }
-        $this->hidePageNavigation = (bool)\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class)->get('easyconf')['hidePageNavigation'] ?? false;
+        $this->hidePageNavigation = is_array($extensionConfig) ? (bool)($extensionConfig['hidePageNavigation'] ?? false) : false;
         $this->multipleTypes = count($GLOBALS['TCA']['tx_easyconf_configuration']['types']) > 1;
         $this->pageUid = (int)($this->request->getQueryParams()['id'] ?? 0);
-        $this->templateUid = intval($this->databaseService->getField('sys_template', 'uid', ['pid' => $this->pageUid]));
-        $this->configuration = $this->databaseService->getRecord('tx_easyconf_configuration', ['pid' => $this->pageUid]);
-        $this->hiddenPageNavigationHandling();
-        if ($this->pageUid > 0 && $this->templateUid > 0 && $this->configuration === null) {
-            $this->configuration = self::createConfiguration($this->pageUid);
+        if($this->pageUid > 0) {
+            $this->templateUid = intval($this->databaseService->getField('sys_template', 'uid', ['pid' => $this->pageUid]));
+            $this->configuration = $this->databaseService->getRecord('tx_easyconf_configuration', ['pid' => $this->pageUid]);
+            $this->hiddenPageNavigationHandling();
+            if ($this->pageUid > 0 && $this->templateUid > 0 && $this->configuration === null) {
+                $this->configuration = self::createConfiguration($this->pageUid);
+            }
         }
     }
 
@@ -66,7 +72,7 @@ class ConfigurationController extends ActionController
         $moduleTemplate = $this->moduleTemplateFactory->create($this->request);
         $moduleTemplate->assignMultiple([
             'pageUid' => $this->pageUid,
-            'templateUid' => $this->templateUid,
+            'templateUid' => $this->templateUid ?? null,
             'queryParams' => $this->request->getQueryParams(),
             'sites' => $this->getSitesData(),
             'agency' => $this->getAgencyData(),
@@ -81,7 +87,7 @@ class ConfigurationController extends ActionController
     public function editAction(): ResponseInterface
     {
         if ($this->pageUid > 0 && $this->templateUid > 0 && $this->configuration !== null) {
-            if($this->multipleTypes) {
+            if ($this->multipleTypes) {
                 return $this->redirect('info');
             } else {
                 return $this->redirectToUri((new UriService())->getEditUri($this->configuration, false));
@@ -101,24 +107,32 @@ class ConfigurationController extends ActionController
                 $configuration = $configurationRepository->getFirstByPid($site->getRootPageId());
                 $configurationUid = (int)($configuration['uid'] ?? 0);
                 if ($configurationUid === 0) {
-                    if($hidePageNavigation) {
+                    if ($hidePageNavigation) {
                         $configurationUid = (int)self::createConfiguration($site->getRootPageId())['uid'];
                     } else {
                         return [];
                     }
                 }
-                if(!$GLOBALS['BE_USER']->isInWebMount($site->getRootPageId())) {
+                if (!$GLOBALS['BE_USER']->isInWebMount($site->getRootPageId())) {
                     return [];
                 }
                 $page = $pageRepository->getPage($site->getRootPageId());
                 $title = trim($page['title'] ?? $site->getIdentifier());
                 $title = $title === '' ? $page['subtitle'] : $title;
 
+                $typeToConfigurationUidMap = [];
                 foreach ($GLOBALS['TCA']['tx_easyconf_configuration']['types'] as $key => $type) {
-                    if($type['pageUidFromSiteSetting'] ?? false) {
+                    if ($type['pageUidFromSiteSetting'] ?? false) {
                         try {
                             $pid = ArrayUtility::getValueByPath($site->getSettings()->getAll(), $type['pageUidFromSiteSetting'], '.');
-                        } catch (MissingArrayPathException $e) { $pid = null;}
+                            if(filter_var($pid, FILTER_VALIDATE_INT) !== false && is_string($pid)) {
+                                $pid = (int)$pid;
+                            } else {
+                                throw new Exception('Invalid page UID: ' . $pid);
+                            }
+                        } catch (MissingArrayPathException $e) {
+                            $pid = null;
+                        }
                         $typeToConfigurationUidMap[$key] = self::getConfigurationUid($pid) ?? $configurationUid;
                     } else {
                         $typeToConfigurationUidMap[$key] = $configurationUid;
@@ -127,7 +141,7 @@ class ConfigurationController extends ActionController
 
                 return [
                     'configurationUid' => $configurationUid,
-                    'typeToConfigurationUidMap' => $typeToConfigurationUidMap ?? [],
+                    'typeToConfigurationUidMap' => $typeToConfigurationUidMap,
                     'rootPageTitle' => $title,
                     'rootPageUid' => $site->getRootPageId(),
                 ];
@@ -137,7 +151,7 @@ class ConfigurationController extends ActionController
         return array_filter($sites, static fn (array $site): bool => $site !== []);
     }
 
-    public static function createConfiguration(int $pid)
+    public static function createConfiguration(int $pid): array
     {
         return GeneralUtility::makeInstance(DatabaseService::class)
             ->addRecord(
@@ -147,19 +161,20 @@ class ConfigurationController extends ActionController
             );
     }
 
-    public static function getConfigurationUid($pageUid)
+    public static function getConfigurationUid(?int $pageUid): ?int
     {
-        if($pageUid ?? false) {
-            if($uid = GeneralUtility::makeInstance(DatabaseService::class)
-                ->getField('tx_easyconf_configuration', 'uid', ['pid' => $pageUid])) {
-                return $uid;
+        if ($pageUid !== null) {
+            $uid = GeneralUtility::makeInstance(DatabaseService::class)
+                ->getField('tx_easyconf_configuration', 'uid', ['pid' => $pageUid]);
+            if ($uid !== '') {
+                return (int)$uid;
             } else {
-                return self::createConfiguration((int)$pageUid)['uid'];
+                $config = self::createConfiguration($pageUid);
+                return (int)$config['uid'];
             }
         }
         return null;
     }
-
 
     /**
      * Hidden page navigation
@@ -169,11 +184,11 @@ class ConfigurationController extends ActionController
      */
     protected function hiddenPageNavigationHandling(): void
     {
-        if($this->hidePageNavigation) {
+        if ($this->hidePageNavigation) {
             $rootPageUids = array_column($this->getSitesData(), 'rootPageUid');
-            if($rootPageUids && !($this->templateUid && in_array($this->pageUid, $rootPageUids))) {
+            if (count($rootPageUids) > 0 && !($this->templateUid !== null && $this->templateUid > 0 && in_array($this->pageUid, $rootPageUids, true))) {
                 // if multiple pages with TS root accessible
-                if(count($rootPageUids) > 1) {
+                if (count($rootPageUids) > 1) {
                     $this->redirect('info');
                 } elseif (count($rootPageUids) === 1) {
                     $this->pageUid = $rootPageUids[0];
