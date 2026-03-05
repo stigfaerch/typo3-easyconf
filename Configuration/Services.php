@@ -26,6 +26,9 @@ return function (ContainerConfigurator $container, ContainerBuilder $containerBu
     $services
         ->load('Buepro\\Easyconf\\', '../Classes/*');
 
+    $services
+        ->set(\Buepro\Easyconf\Service\DatabaseService::class)
+        ->public();
 //    // Specific configuration for Buepro\Easyconf\Configuration\SiteConfiguration
 //    $serviceConfigurator = $services
 //        ->get(Buepro\Easyconf\Configuration\SiteConfiguration::class);
