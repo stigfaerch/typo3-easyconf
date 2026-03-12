@@ -7,10 +7,12 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Buepro\Easyconf\Service;
+namespace Buepro\Easyconf\TcaBuilder;
 
 use Buepro\Easyconf\Mapper\EasyconfMapper;
-use Buepro\Easyconf\Utility\PropertyHelper;
+use Buepro\Easyconf\Service\Mapping;
+use Buepro\Easyconf\TcaBuilder\FieldType\HelpText;
+use Buepro\Easyconf\Utility\TcaBuilderUtility;
 use Buepro\Easyconf\Utility\TcaUtility;
 
 class Palette
@@ -34,19 +36,20 @@ class Palette
 
     public function map(Mapping ...$mappings): Type
     {
-        $propertiesBuilt = array_map(fn (Mapping $property) => $this->parentObject->build($property), $mappings);
+        $propertiesBuilt = array_map(fn (Mapping $property) => $this->parentObject->buildFromMapping($property), $mappings);
 
         if ($this->header !== '') {
-            $helpProp = $this->parentObject->build(
-                Mapping::create(EasyconfMapper::class, '', $this->propertyId . 'header')->withProperties([
-                  PropertyHelper::helpText($this->propertyId . 'header', $this->header, headerTag: $this->headerTag, propConfig: ['colClass' => 'my-0']),
-              ])
+            $helpProp = $this->parentObject->buildFromMapping(
+                Mapping::create(EasyconfMapper::class, '', $this->propertyId . 'header')
+                    ->with(
+                        HelpText::create($this->propertyId . 'header')->header($this->header)->headerTag($this->headerTag ?? '')->properties(['colClass' => 'my-0'])
+                    )
             );
             $propertiesBuilt = array_merge([$helpProp, '--linebreak--'], $propertiesBuilt);
         }
         $paletteConfig = TcaUtility::getPalette(implode(',', $propertiesBuilt), '', $this->lineBreakPeriod);
-        if (PropertyHelper::getHeaderTagConfig() !== null || $this->headerTag !== null) {
-            $paletteHeaderTagConfig = (PropertyHelper::getHeaderTagConfig() ?? PropertyHelper::getHeaderTagConfigFromArray([$this->headerTag]));
+        if (TcaBuilderUtility::getHeaderTagConfig() !== null || $this->headerTag !== null) {
+            $paletteHeaderTagConfig = (TcaBuilderUtility::getHeaderTagConfig() ?? TcaBuilderUtility::getHeaderTagConfigFromArray([$this->headerTag]));
             $paletteConfig = array_merge($paletteConfig, ['headerTag' => $paletteHeaderTagConfig]);
         }
         $GLOBALS['TCA']['tx_easyconf_configuration']['palettes'][$this->propertyId] = $paletteConfig;

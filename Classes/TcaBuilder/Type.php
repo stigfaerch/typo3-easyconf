@@ -7,9 +7,13 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Buepro\Easyconf\Service;
+namespace Buepro\Easyconf\TcaBuilder;
 
-use Buepro\Easyconf\Utility\PropertyHelper;
+use Buepro\Easyconf\Service\Mapping;
+use Buepro\Easyconf\TcaBuilder\FieldType\AbstractFieldType;
+use Buepro\Easyconf\TcaBuilder\FieldType\Blank;
+use Buepro\Easyconf\TcaBuilder\FieldType\Linebreak;
+use Buepro\Easyconf\Utility\TcaBuilderUtility;
 use Buepro\Easyconf\Utility\TcaUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -17,7 +21,7 @@ class Type
 {
     protected int $type;
 
-    protected array $properties = [];
+    protected array $fields = [];
 
     protected ?bool $clearCacheForSite;
 
@@ -25,9 +29,9 @@ class Type
 
     protected array $configuration = [];
 
-    protected TcaBuilderService $tcaBuilderService;
+    protected TcaBuilder $tcaBuilderService;
 
-    public function __construct(TcaBuilderService $tcaBuilderService, int $type)
+    public function __construct(TcaBuilder $tcaBuilderService, int $type)
     {
         $this->tcaBuilderService = $tcaBuilderService;
         $this->type = $type;
@@ -58,13 +62,13 @@ class Type
         if (is_null($id)) {
             $id = bin2hex(random_bytes(5));
         }
-        $this->properties[] = '--div--;' . ($tabName ?? $this->l10nFile . ':' . $id);
+        $this->fields[] = '--div--;' . ($tabName ?? $this->l10nFile . ':' . $id);
         return $this;
     }
 
     public function buildConfiguration(): void
     {
-        $GLOBALS['TCA']['tx_easyconf_configuration']['types'][$this->type] = array_merge($this->configuration, ['showitem' => implode(', ', $this->properties)]);
+        $GLOBALS['TCA']['tx_easyconf_configuration']['types'][$this->type] = array_merge($this->configuration, ['showitem' => implode(', ', $this->fields)]);
     }
 
     /**
@@ -97,46 +101,45 @@ class Type
         return $this;
     }
 
-    public function map(Mapping ...$properties): static
+    public function map(Mapping ...$mappings): static
     {
-        foreach ($properties as $propertiesObject) {
-            $this->properties[] = $this->build($propertiesObject);
+        foreach ($mappings as $mapping) {
+            $this->fields[] = $this->buildFromMapping($mapping);
         }
         return $this;
     }
 
     public function addPaletteToProperties(string $id): void
     {
-        $this->properties[] = '--palette--;;' . $id;
+        $this->fields[] = '--palette--;;' . $id;
     }
 
-    public function build(Mapping $mapping): string
+    public function buildFromMapping(Mapping $mapping): string
     {
         $fieldPrefix = GeneralUtility::camelCaseToLowerCaseUnderscored($mapping->getFieldPrefix());
         $newPropertiesForPropertyMap = [];
         $newProperties = [];
         $modify = [];
-        foreach ($mapping->getProperties() as $key => $value) {
-            if (is_int($key)) {
-                if (is_array($value)) {
-                    $newPropertiesForPropertyMap[] = $newProperties[] = $value['property'] ?? $key;
-                    $modify[] = $value;
-                } elseif ($value === '--linebreak--') {
-                    $newProperties[] = $value;
-                } else {
-                    $newPropertiesForPropertyMap[] = $newProperties[] = $value;
-                    $modify[] = null;
-                }
-            } else {
-                $newProperties[] = $newPropertiesForPropertyMap[] = $key;
-                $value['config'] = $value['config'] ?? [];
-                $value['property'] = $key;
-                if ($value['displayCond'] ?? false) {
-                    $value['displayCond'] = $value['displayCond'];
-                }
-                PropertyHelper::addFieldInformationConfiguration($value['config']);
-                PropertyHelper::addFieldWizardConfiguration($value['config']);
-                $modify[] = $value;
+        /**
+         * @var  $key
+         * @var AbstractFieldType $object
+         */
+        foreach ($mapping->getFieldTypes() as $key => $object) {
+            switch (get_class($object)) {
+                case Linebreak::class:
+                    $newProperties[] = '--linebreak--';
+                    break;
+                case Blank::class:
+                    $newPropertiesForPropertyMap[] = $newProperties[] = TcaBuilderUtility::randomIdIfNull();
+                    $modify[] = [
+                        'config' => [
+                            'type' => 'blank',
+                        ]
+                    ];
+                    break;
+                default:
+                    $newPropertiesForPropertyMap[] = $newProperties[] = $object->getField() ?? $key;
+                    $modify[] = $object();
             }
         }
         $propertyList = implode(',', $newProperties);

@@ -13,7 +13,7 @@ defined('TYPO3') || die('Access denied.');
 
 (static function () {
 
-    \Buepro\Easyconf\Service\TcaBuilderService::includeConstantDefaultFileContent();
+    \Buepro\Easyconf\TcaBuilder\TcaBuilder::includeConstantDefaultFileContent();
 
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTypoScriptSetup(
         '@import "EXT:easyconf/Configuration/TypoScript/setup.typoscript"'

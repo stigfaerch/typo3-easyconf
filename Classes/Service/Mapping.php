@@ -10,6 +10,7 @@
 namespace Buepro\Easyconf\Service;
 
 use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
+use Buepro\Easyconf\TcaBuilder\FieldType\FieldTypeInterface;
 
 final class Mapping
 {
@@ -34,7 +35,7 @@ final class Mapping
 
     public static function create(string $mapper, string $path, string $fieldPrefix = ''): static
     {
-        return new static($path, $fieldPrefix, $mapper);
+        return new Mapping($path, $fieldPrefix, $mapper);
     }
 
     public static function forConstants(string $path, string $fieldPrefix = ''): static
@@ -57,12 +58,18 @@ final class Mapping
         return $this->fieldPrefix;
     }
 
-    public function getProperties(): array
+    public function getFieldTypes(): array
     {
         return $this->properties;
     }
 
-    public function withProperties(array $properties): static
+    public function withProperties(array $properties): Mapping
+    {
+        $this->properties = $properties;
+        return $this;
+    }
+
+    public function with(FieldTypeInterface ...$properties): Mapping
     {
         $this->properties = $properties;
         return $this;

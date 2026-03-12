@@ -7,7 +7,7 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Buepro\Easyconf\Service;
+namespace Buepro\Easyconf\TcaBuilder;
 
 use Buepro\Easyconf\Mapper\EasyconfMapper;
 use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
@@ -16,7 +16,7 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class TcaBuilderService
+class TcaBuilder
 {
     protected string $l10nFile = '';
 
@@ -54,7 +54,7 @@ class TcaBuilderService
 
     public static function getConstantDefaultFilePath(string $constantDefaultFilename = 'constant_default.typoscript'): string
     {
-        return Environment::getConfigPath() . '/' . $constantDefaultFilename;
+        return Environment::getConfigPath() . 'TcaBuilderService.php/' . $constantDefaultFilename;
     }
 
     public function generateColumnData(): void
