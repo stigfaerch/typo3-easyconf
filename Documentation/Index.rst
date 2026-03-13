@@ -44,6 +44,7 @@ configure main aspects from the website.
 
     Introduction/Index
     Configuration/Index
+    Configuration/TcaBuilder
     User/Index
     Tutorials/Index
     Changelog/Index

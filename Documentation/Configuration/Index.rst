@@ -6,6 +6,12 @@
 Configuration
 =============
 
+..  toctree::
+    :maxdepth: 2
+    :titlesonly:
+
+    UsingTcaBuilder
+
 Agency information
 ==================
 
