@@ -54,7 +54,7 @@ class TcaBuilder
 
     public static function getConstantDefaultFilePath(string $constantDefaultFilename = 'constant_default.typoscript'): string
     {
-        return Environment::getConfigPath() . 'TcaBuilderService.php/' . $constantDefaultFilename;
+        return Environment::getConfigPath() . '/' . $constantDefaultFilename;
     }
 
     public function generateColumnData(): void
