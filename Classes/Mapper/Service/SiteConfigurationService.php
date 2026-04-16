@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Buepro\Easyconf\Mapper\Service;
 
+use Symfony\Component\Yaml\Yaml;
+use TYPO3\CMS\Core\Configuration\Exception\SiteConfigurationWriteException;
 use TYPO3\CMS\Core\Configuration\Loader\YamlFileLoader;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -31,8 +33,10 @@ class SiteConfigurationService extends AbstractSiteConfigurationService
     public function write(array $siteData): void
     {
         if ($this->getSite() !== null) {
-            /** TODO: should protectPlaceholders be set to true?? */
-            $this->siteWriter->write($this->getSite()->getIdentifier(), $siteData, false);
+            $yamlFileContents = Yaml::dump($siteData, 99, 2);
+            if (!GeneralUtility::writeFile($this->configPath . '/' . $this->getSite()->getIdentifier() . '/config.yaml', $yamlFileContents, true)) {
+                throw new SiteConfigurationWriteException('Unable to write site configuration in sites/' . $this->getSite()->getIdentifier() . '/' . 'config.yaml', 1590487011);
+            }
         }
     }
 }

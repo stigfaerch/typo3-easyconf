@@ -9,7 +9,10 @@
 
 namespace Buepro\Easyconf\Mapper\Service;
 
+use Symfony\Component\Yaml\Yaml;
+use TYPO3\CMS\Core\Configuration\Exception\SiteConfigurationWriteException;
 use TYPO3\CMS\Core\Site\Entity\Site;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SiteSettingsService extends AbstractSiteConfigurationService
 {
@@ -30,7 +33,10 @@ class SiteSettingsService extends AbstractSiteConfigurationService
     public function write(array $siteData): void
     {
         if($this->getSite() !== null){
-            $this->siteWriter->writeSettings($this->getSite()->getIdentifier(), $siteData);
+            $yamlFileContents = Yaml::dump($siteData, 99, 2);
+            if (!GeneralUtility::writeFile($this->configPath . '/' . $this->getSite()->getIdentifier() . '/settings.yaml', $yamlFileContents, true)) {
+                throw new SiteConfigurationWriteException('Unable to write site settings in sites/' . $this->getSite()->getIdentifier() . '/' . 'settings.yaml', 1590487012);
+            }
 
             // Invalidate the specific cache entry for this site's settings
             $this->invalidateSiteSettingsCache();
