@@ -31,7 +31,8 @@ class SiteConfigurationService extends AbstractSiteConfigurationService
     public function write(array $siteData): void
     {
         if ($this->getSite() !== null) {
-            $this->siteWriter->write($this->getSite()->getIdentifier(), $siteData);
+            /** TODO: should protectPlaceholders be set to true?? */
+            $this->siteWriter->write($this->getSite()->getIdentifier(), $siteData, false);
         }
     }
 }
