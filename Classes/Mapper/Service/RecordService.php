@@ -33,15 +33,13 @@ class RecordService implements SingletonInterface, MapperServiceInterface
         // Find all columns where mapper is RecordMapper and get the value from the database
         foreach ($GLOBALS['TCA']['tx_easyconf_configuration']['columns'] as $columnKey => $columnData) {
             if (($columnData['tx_easyconf']['mapper'] ?? false) === RecordMapper::class) {
-                $pid = \Buepro\Easyconf\Utility\GeneralUtility::getValue($pageUid, $columnData['RecordMapper']['pageId']);
-                if (!is_numeric($pid)) {
-                    throw new Exception('RecordMapper pageId must be a single integer value', 1772553351);
+                if($pid = \Buepro\Easyconf\Utility\GeneralUtility::getValue($pageUid, $columnData['RecordMapper']['pageId']) ?? false) {
+                    $columnData['RecordMapper']['pageId'] = (int)$pid;
+                    $record = BackendUtility::getRecord($columnData['RecordMapper']['table'], (int)$pid, $columnData['RecordMapper']['field']);
+                    $value = $record[$columnData['RecordMapper']['field']] ?? '';
+                    $this->fields = ArrayUtility::setValueByPath($this->fields, $columnData['tx_easyconf']['path'], (string)$value, '.');
+                    $this->configuration[$columnData['tx_easyconf']['path']] = $columnData;
                 }
-                $columnData['RecordMapper']['pageId'] = (int)$pid;
-                $record = BackendUtility::getRecord($columnData['RecordMapper']['table'], (int)$pid, $columnData['RecordMapper']['field']);
-                $value = $record[$columnData['RecordMapper']['field']] ?? '';
-                $this->fields = ArrayUtility::setValueByPath($this->fields, $columnData['tx_easyconf']['path'], (string)$value, '.');
-                $this->configuration[$columnData['tx_easyconf']['path']] = $columnData;
             }
         }
         return $this;
