@@ -10,6 +10,7 @@
 namespace Buepro\Easyconf\Form\Element;
 
 use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
+use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -23,6 +24,7 @@ class CreatePageButtonElement extends AbstractFormElement
         $result = $this->initializeResultArray();
         $label = $this->getValue('label');
         $newPageTitle = $this->getValue('newPageTitle');
+        $newPageType = $this->getValue('newPageType', 'int');
         $targetPid = (string)$this->getValue('targetPid', 'int');
         $copySourcePid = $this->getValue('copySourcePid', 'int');
         $newPidSettingPath = $this->getValue('newPidSettingPath', 'string', false);
@@ -36,55 +38,17 @@ class CreatePageButtonElement extends AbstractFormElement
         $html[] = '</button>';
         $html[] = '</div>';
 
-
-        $script = <<<JS
-// Must be a module so import works
-import AjaxRequest from '@typo3/core/ajax/ajax-request.js';
-
-const btn = document.getElementById('{$buttonId}');
-if (btn) {
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        const originalText = btn.innerText;
-        btn.innerText = 'Arbejder...';
-        btn.disabled = true;
-
-        const data = {
-            targetPid: '{$targetPid}',
-            newPidSettingPath: '{$newPidSettingPath}',
-            copySourcePid: '{$copySourcePid}',
-            newPageTitle: '{$newPageTitle}',
-        };
-
-        new AjaxRequest(TYPO3.settings.ajaxUrls.easyconf_ajaxform_createpage)
-            .post(data)
-            .then(async (response) => {
-                // response.resolve() will parse JSON or throw on HTTP error
-                const json = await response.resolve();
-                if (top.TYPO3 && top.TYPO3.Notification) {
-                    top.TYPO3.Notification.success('Succes', 'Siden blev oprettet.');
-                }
-                return json;
-            })
-            .catch((err) => {
-                console.error('Fejl:', err);
-                if (top.TYPO3 && top.TYPO3.Notification) {
-                    top.TYPO3.Notification.error('Fejl', 'Der skete en fejl under oprettelsen.');
-                }
-            })
-            .finally(() => {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                window.location.reload();
-            });
-    });
-}
-JS;
-
-        $html[] = '<script type="module">' . $script . '</script>';
-
         $result['html'] = implode(PHP_EOL, $html);
+
+        $result['javaScriptModules'][] = JavaScriptModuleInstruction::create(
+            '@buepro/easyconf/form-engine/element/create-page-button.js'
+        )->instance('#' . $buttonId, [
+            'targetPid' => $targetPid,
+            'newPidSettingPath' => $newPidSettingPath,
+            'copySourcePid' => $copySourcePid,
+            'newPageTitle' => $newPageTitle,
+            'newPageType' => $newPageType
+        ]);
         return $result;
     }
 

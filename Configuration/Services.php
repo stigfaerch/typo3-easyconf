@@ -29,6 +29,9 @@ return function (ContainerConfigurator $container, ContainerBuilder $containerBu
     $services
         ->set(\Buepro\Easyconf\Service\DatabaseService::class)
         ->public();
+    $services
+        ->set(\Buepro\Easyconf\Controller\AjaxFormController::class)
+        ->public();
 //    // Specific configuration for Buepro\Easyconf\Configuration\SiteConfiguration
 //    $serviceConfigurator = $services
 //        ->get(Buepro\Easyconf\Configuration\SiteConfiguration::class);

@@ -23,9 +23,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class AjaxFormController
 {
 
-    public function __construct(private readonly \TYPO3\CMS\Core\Site\SiteFinder $siteFinder)
-    {
-    }
+    public function __construct(private readonly \TYPO3\CMS\Core\Site\SiteFinder $siteFinder) {}
+
     public function createPage(ServerRequestInterface $request): ResponseInterface
     {
         $parsedBody = (array)$request->getParsedBody();
@@ -34,12 +33,14 @@ final class AjaxFormController
                 'Please provide a number for targetPid.',
                 1580585107,
             );
+        $targetPid = (int)$targetPid;
         $newPageTitle = $parsedBody['newPageTitle'];
+        $newPageType = $parsedBody['newPageType'];
 
         $newPidSettingPath = $parsedBody['newPidSettingPath'];
 
-        if ($copySourcePid = $parsedBody['copySourcePid'] ?? false) {
-            $newPageUid = $this->createNewPageFromCopy($copySourcePid, $targetPid, $newPageTitle);
+        if ($copySourcePid = (int)$parsedBody['copySourcePid'] ?? 0) {
+            $newPageUid = $this->createNewPageFromCopy($copySourcePid, $targetPid, $newPageTitle, $newPageType);
             if ($newPageTitle > 0) {
                 $site = $this->siteFinder->getSiteByPageId($newPageUid);
 
@@ -66,7 +67,7 @@ final class AjaxFormController
         return $response;
     }
 
-    private function createNewPageFromCopy(int $sourcePid, int $targetPid, string $newTitle = null): int
+    private function createNewPageFromCopy(int $sourcePid, int $targetPid, ?string $newTitle = null, ?int $newPageType = null): int
     {
         $adminBeUser = \Buepro\Easyconf\Utility\GeneralUtility::initAdmin((int)$GLOBALS['BE_USER']->user['uid']);
         $data = [];
@@ -85,14 +86,16 @@ final class AjaxFormController
         $dataHandler->process_cmdmap();
 
         $newPageUid = false;
-        if (count($dataHandler->errorLog) > 0) {
+        if (count($dataHandler->errorLog) === 0) {
             $copyMapping = $dataHandler->copyMappingArray_merged['pages'];
             $newPageUid = $copyMapping[$sourcePid] ?? null;
 
             if ($newTitle !== null && $newTitle !== '') {
                 $data['pages'][$newPageUid]['title'] = $newTitle;
             }
-            $data['pages'][$newPageUid]['doktype'] = 254;
+            if ($newPageType ?? false) {
+                $data['pages'][$newPageUid]['doktype'] = $newPageType;
+            }
             $dataHandler->start($data, []);
             $dataHandler->process_datamap();
             $dataHandler->process_cmdmap();
