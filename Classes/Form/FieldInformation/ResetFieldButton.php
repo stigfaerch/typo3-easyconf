@@ -11,7 +11,11 @@ namespace Buepro\Easyconf\Form\FieldInformation;
 
 use Buepro\Easyconf\Mapper\TypoScriptConstantMapper;
 use TYPO3\CMS\Backend\Form\AbstractNode;
+use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Imaging\IconSize;
 use TYPO3\CMS\Core\Page\JavaScriptModuleInstruction;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ResetFieldButton extends AbstractNode
 {
@@ -36,7 +40,10 @@ class ResetFieldButton extends AbstractNode
         $result['javaScriptModules'][] = JavaScriptModuleInstruction::create(
             '@buepro/easyconf/form-engine/field-wizard/reset-field-value.js'
         )->instance($fieldElementName, $resetId);
-        $result['html'] = '<a href="#" title="Klik for at gendanne oprindelig værdi" id="' . $resetId . '" class="btn btn-default" style="margin-top: 0.5em; padding:0!important; width:24px; height:24px; background-repeat: no-repeat; background-size: 80%; background-position: center; background-image: url(\'' . $iconPath . '\')"></a>';
+
+        $label = $GLOBALS['LANG']->sL('LLL:EXT:easyconf/Resources/Private/Language/locallang.xlf:fieldValue.reset.description');
+        $svg = GeneralUtility::makeInstance(IconFactory::class)->getIcon('actions-undo', IconSize::SMALL)->render();
+        $result['html'] = '<a href="#" title="' . htmlspecialchars($label) . '" id="' . $resetId . '" class="btn btn-default" style="margin-top: 0.5em; padding:0!important; width:24px; height:24px;">' . $svg . '</a>';
         return $result;
     }
 }

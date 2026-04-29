@@ -53,6 +53,9 @@
 			<trans-unit id="info.restoreFieldValue.description" resname="info.restoreFieldValue.description">
 				<source>Inherited field values can be restored by saving double question marks (`??`) as field value.</source>
 			</trans-unit>
+			<trans-unit id="fieldValue.reset.description" resname="fieldValue.reset.description">
+				<source>Click to restore the default value.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
