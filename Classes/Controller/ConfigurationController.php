@@ -168,8 +168,12 @@ class ConfigurationController extends ActionController
     public static function getConfigurationUid(?int $pageUid): ?int
     {
         if ($pageUid !== null) {
-            $uid = GeneralUtility::makeInstance(DatabaseService::class)
-                ->getField('tx_easyconf_configuration', 'uid', ['pid' => $pageUid]);
+            try {
+                $uid = GeneralUtility::makeInstance(DatabaseService::class)
+                    ->getField('tx_easyconf_configuration', 'uid', ['pid' => $pageUid]);
+            } catch (Exception $e) {
+                $uid = '';
+            }
             if ($uid !== '') {
                 return (int)$uid;
             } else {
