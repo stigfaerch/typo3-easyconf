@@ -38,7 +38,7 @@ class Type
         $this->l10nFile = $tcaBuilderService->getL10nFile();
     }
 
-    public function init(string $cardIcon = '', string $title = null, string $subtitle = null, string $description = null, string $requiredBackendUserGroup = null, string $pageUidFromSiteSetting = null): static
+    public function init(string $cardIcon = '', ?string $title = null, ?string $subtitle = null, ?string $description = null, ?string $requiredBackendUserGroup = null, ?string $pageUidFromSiteSetting = null): static
     {
         $this->configuration =
             [
@@ -52,12 +52,12 @@ class Type
         return $this;
     }
 
-    public function addPalette(string $id = null, int $lineBreakPeriod = 1, string $header = '', ?string $headerTag = null): Palette
+    public function addPalette(?string $id = null, int $lineBreakPeriod = 1, string $header = '', ?string $headerTag = null): Palette
     {
         return new Palette($this, $id, $lineBreakPeriod, $header, $headerTag);
     }
 
-    public function addTab(string $id = null, ?string $tabName = null): static
+    public function addTab(?string $id = null, ?string $tabName = null): static
     {
         if (is_null($id)) {
             $id = bin2hex(random_bytes(5));
